@@ -85,10 +85,10 @@ export const RsvpSection: React.FC = () => {
 
           {/* CRITICAL: ADULTS-ONLY CELEBRATION NOTICE */}
           <div className="mb-8 p-5 bg-[#FAF0ED] border-2 border-[#D49B9E] rounded-2xl shadow-sm text-center">
-            <p className="font-sans-luxury text-xs sm:text-sm uppercase tracking-[0.15em] text-[#9E3E43] font-bold">
+            <p className="font-sans-luxury text-xs sm:text-sm uppercase tracking-[0.15em] text-[#9E3E43] font-bold underline underline-offset-4 decoration-[#9E3E43]/60">
               ADULTS-ONLY CELEBRATION — NO CHILDREN ARE ALLOWED
             </p>
-            <p className="font-arabic text-sm sm:text-base text-[#9E3E43] font-bold mt-1" dir="rtl">
+            <p className="font-arabic text-sm sm:text-base text-[#9E3E43] font-bold mt-1 underline underline-offset-4 decoration-[#9E3E43]/60" dir="rtl">
               الحفل مخصص للكبار فقط — يُرجى بكل مودة عدم اصطحاب الأطفال
             </p>
           </div>

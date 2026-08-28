@@ -27,28 +27,26 @@ export const InvitationSection: React.FC = () => {
           <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#C5A059]/40 rounded-bl-lg pointer-events-none" />
           <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#C5A059]/40 rounded-br-lg pointer-events-none" />
 
-          {/* Poetic Opening Quotes in Arabic */}
-          <div className="mb-10 space-y-4" dir="rtl">
+          {/* Poetic & Invitation Announcement in Arabic */}
+          <div className="space-y-6" dir="rtl">
             <h3 className="font-arabic-calligraphy text-3xl sm:text-4xl md:text-5xl text-[#2B2421] leading-relaxed">
               وهكذا تبدأ حكايتنا الأبدية
             </h3>
 
-            <p className="font-arabic text-lg sm:text-2xl text-[#6B5E55] max-w-xl mx-auto leading-relaxed pt-2">
-              ببالغ الفرح والسرور، نتشرف بدعوتكم للاحتفال بزفاف
+            <p className="font-arabic text-xl sm:text-2xl md:text-3xl text-[#6B5E55] max-w-2xl mx-auto leading-relaxed pt-2">
+              ببالغ الفرح والسرور، نتشرف عائلة الحمدني و الحاج بدعوتكم للاحتفال بزفاف
             </p>
-          </div>
 
-          {/* Delicate Divider */}
-          <div className="flex items-center justify-center gap-4 w-36 mx-auto mb-10 opacity-70">
-            <div className="h-[1px] flex-1 bg-[#C5A059]" />
-            <div className="w-2 h-2 rotate-45 bg-[#C5A059]" />
-            <div className="h-[1px] flex-1 bg-[#C5A059]" />
-          </div>
+            {/* Delicate Divider */}
+            <div className="flex items-center justify-center gap-4 w-36 mx-auto my-8 opacity-70">
+              <div className="h-[1px] flex-1 bg-[#C5A059]" />
+              <div className="w-2 h-2 rotate-45 bg-[#C5A059]" />
+              <div className="h-[1px] flex-1 bg-[#C5A059]" />
+            </div>
 
-          {/* FAMILIES INVITATION ANNOUNCEMENT - ONLY FAMILY NAMES */}
-          <div className="space-y-4" dir="rtl">
-            <h2 className="font-arabic-calligraphy text-4xl sm:text-5xl md:text-6xl text-[#A67C2E] leading-normal font-bold">
-              الحمدني و الحاج
+            {/* Couple's Names in Gold at the Bottom */}
+            <h2 className="font-arabic-calligraphy text-5xl sm:text-6xl md:text-7xl text-[#A67C2E] leading-normal font-bold">
+              زينب و حسن
             </h2>
           </div>
         </motion.div>
