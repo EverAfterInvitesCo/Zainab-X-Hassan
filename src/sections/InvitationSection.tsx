@@ -1,76 +1,58 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { useLanguage } from '../context/LanguageContext';
 
 export const InvitationSection: React.FC = () => {
-  const { t, language } = useLanguage();
-
   return (
     <section
       id="invitation"
-      className="relative w-full py-36 md:py-48 bg-[#F5F3EF] text-[#0A0A0A] overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F5F3EF]"
+      className="relative w-full py-28 md:py-36 bg-[#FDFBF7] text-[#2B2421] overflow-hidden"
     >
-      {/* Subtle tactile paper texture grain */}
-      <div className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
+      {/* Background decorative warm ambient lighting */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#F5E5E2]/40 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#F5ECE1]/60 rounded-full blur-3xl" />
+      </div>
 
-      <div className="max-w-4xl mx-auto px-6 sm:px-10 md:px-16 text-center relative z-10">
+      <div className="max-w-3xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col items-center"
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-[#FFFFFF] border border-[#EADBCE] p-8 sm:p-14 md:p-18 rounded-3xl shadow-[0_20px_60px_rgba(180,140,110,0.09)] text-center relative"
         >
-          {/* Poetic Quote Banner */}
-          <div className="relative mb-14 md:mb-18">
-            <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#0A0A0A]/20 select-none block leading-none font-normal mb-2">
-              “
-            </span>
-            <p
-              className={`text-[#0A0A0A]/90 font-light tracking-wide sm:tracking-wider leading-relaxed px-4 max-w-2xl ${
-                language === 'ar'
-                  ? 'font-arabic-calligraphy text-3xl sm:text-4xl md:text-5xl'
-                  : 'font-serif-luxury italic text-2xl sm:text-3xl md:text-4xl'
-              }`}
-            >
-              {t.invitation.subtitle}
+          {/* Subtle Corner Gold Flourishes */}
+          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#C5A059]/40 rounded-tl-lg pointer-events-none" />
+          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#C5A059]/40 rounded-tr-lg pointer-events-none" />
+          <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#C5A059]/40 rounded-bl-lg pointer-events-none" />
+          <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#C5A059]/40 rounded-br-lg pointer-events-none" />
+
+          {/* Poetic Opening Quotes in Arabic */}
+          <div className="mb-10 space-y-4" dir="rtl">
+            <h3 className="font-arabic-calligraphy text-3xl sm:text-4xl md:text-5xl text-[#2B2421] leading-relaxed">
+              وهكذا تبدأ حكايتنا الأبدية
+            </h3>
+
+            <p className="font-arabic text-lg sm:text-2xl text-[#6B5E55] max-w-xl mx-auto leading-relaxed pt-2">
+              ببالغ الفرح والسرور، نتشرف بدعوتكم للاحتفال بزفاف
             </p>
-            <div className="w-12 h-[1px] bg-[#0A0A0A]/20 mx-auto mt-6" />
           </div>
 
-          {/* Invitation Statement */}
-          <p
-            className={`font-light text-[#0A0A0A]/80 leading-relaxed md:leading-[1.7] max-w-2xl mb-12 tracking-wide ${
-              language === 'ar'
-                ? 'font-arabic-calligraphy text-2xl sm:text-3xl md:text-4xl leading-loose'
-                : 'font-serif-luxury text-lg sm:text-xl md:text-2xl'
-            }`}
-          >
-            {t.invitation.body}
-          </p>
-
-          {/* Editorial Double Line Divider */}
-          <div className="flex items-center justify-center gap-3 w-full max-w-xs mb-12 opacity-30">
-            <div className="h-[1px] flex-1 bg-[#0A0A0A]" />
-            <div className="w-1.5 h-1.5 rotate-45 border border-[#0A0A0A]" />
-            <div className="h-[1px] flex-1 bg-[#0A0A0A]" />
+          {/* Delicate Divider */}
+          <div className="flex items-center justify-center gap-4 w-36 mx-auto mb-10 opacity-70">
+            <div className="h-[1px] flex-1 bg-[#C5A059]" />
+            <div className="w-2 h-2 rotate-45 bg-[#C5A059]" />
+            <div className="h-[1px] flex-1 bg-[#C5A059]" />
           </div>
 
-          {/* Couple Full Names */}
-          <div className="flex flex-col items-center">
-            <p
-              className={`text-[#0A0A0A] font-light leading-relaxed ${
-                language === 'ar'
-                  ? 'font-arabic-calligraphy text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-wide'
-                  : 'font-display-luxury text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-[0.16em] sm:tracking-[0.2em] md:tracking-[0.24em] uppercase'
-              }`}
-            >
-              {t.invitation.names}
-            </p>
+          {/* FAMILIES INVITATION ANNOUNCEMENT - ONLY FAMILY NAMES */}
+          <div className="space-y-4" dir="rtl">
+            <h2 className="font-arabic-calligraphy text-4xl sm:text-5xl md:text-6xl text-[#A67C2E] leading-normal font-bold">
+              الحمدني و الحاج
+            </h2>
           </div>
         </motion.div>
       </div>
     </section>
   );
 };
-

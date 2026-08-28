@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { MusicProvider } from './context/MusicContext';
 import { AudioPlayer } from './components/AudioPlayer';
 import { Navigation } from './components/Navigation';
 import { EntryScreen } from './sections/EntryScreen';
 import { HeroSection } from './sections/HeroSection';
 import { InvitationSection } from './sections/InvitationSection';
-import { DateCountdownSection } from './sections/DateCountdownSection';
-import { VenueSection } from './sections/VenueSection';
+import { DateAndVenueSection } from './sections/DateAndVenueSection';
 import { PolaroidMemoriesSection } from './sections/PolaroidMemoriesSection';
-import { GuestbookSection } from './sections/GuestbookSection';
 import { RsvpSection } from './sections/RsvpSection';
 import { FinalSection } from './sections/FinalSection';
 import { AdminPortal } from './pages/AdminPortal';
@@ -18,9 +16,8 @@ import { Lock, Instagram, Facebook, Music2, Mail } from 'lucide-react';
 const MainWeddingApp: React.FC = () => {
   const [isEntered, setIsEntered] = useState<boolean>(false);
   const [isAdminView, setIsAdminView] = useState<boolean>(false);
-  const { language } = useLanguage();
 
-  // Listen for hash navigation e.g. #admin or /admin
+  // Listen for hash navigation e.g. #admin
   useEffect(() => {
     const handleHash = () => {
       if (window.location.hash === '#admin') {
@@ -47,7 +44,7 @@ const MainWeddingApp: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#080808] text-[#F4F2ED] selection:bg-[#F4F2ED] selection:text-[#080808]">
+    <div className="relative min-h-screen bg-[#FAF7F2] text-[#2B2421] selection:bg-[#E8C5C8] selection:text-[#2B2421]">
       {/* Entry Screen Curtain */}
       <EntryScreen onEnter={() => setIsEntered(true)} isEntered={isEntered} />
 
@@ -61,25 +58,23 @@ const MainWeddingApp: React.FC = () => {
       <main id="zh-main-content">
         <HeroSection />
         <InvitationSection />
-        <DateCountdownSection />
-        <VenueSection />
-        <PolaroidMemoriesSection />
+        <DateAndVenueSection />
         <RsvpSection />
-        <GuestbookSection />
+        <PolaroidMemoriesSection />
         <FinalSection />
       </main>
 
-      {/* Small Elegant Footer */}
-      <footer className="w-full bg-[#050505] border-t border-white/10 py-10 px-6 text-center">
-        <div className="max-w-3xl mx-auto flex flex-col items-center gap-4">
+      {/* Luxury Theme Footer */}
+      <footer className="w-full bg-[#F5EFE6] border-t border-[#EADBCE] py-12 px-6 text-center text-[#2B2421]">
+        <div className="max-w-3xl mx-auto flex flex-col items-center gap-5">
           {/* Made with love notice (No heart icon) */}
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-serif-luxury tracking-[0.2em] text-white/70">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-serif-luxury tracking-[0.2em] text-[#6B5E55]">
             <span>Made with love by</span>
             <a
               href="https://www.instagram.com/_everafterinvites_/"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-white tracking-[0.22em] uppercase hover:text-white/80 transition-colors underline-offset-4 hover:underline"
+              className="font-semibold text-[#2B2421] tracking-[0.22em] uppercase hover:text-[#A67C2E] transition-colors underline-offset-4 hover:underline"
             >
               Everafterinvites
             </a>
@@ -92,61 +87,61 @@ const MainWeddingApp: React.FC = () => {
               href="https://www.instagram.com/_everafterinvites_/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-[#6B5E55] hover:text-[#A67C2E] transition-colors group"
               aria-label="Instagram"
             >
               <Instagram size={14} className="group-hover:scale-110 transition-transform" />
-              <span className="font-sans-luxury text-[11px] tracking-wider uppercase">Instagram</span>
+              <span className="font-sans-luxury text-[11px] tracking-wider uppercase font-semibold">Instagram</span>
             </a>
 
-            <span className="text-white/20">·</span>
+            <span className="text-[#EADBCE]">·</span>
 
             {/* TikTok */}
             <a
               href="https://www.tiktok.com/@_everafterinvites_"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-[#6B5E55] hover:text-[#A67C2E] transition-colors group"
               aria-label="TikTok"
             >
-              <Music2 size={14} className="group-hover:scale-110 transition-transform text-white/80" />
-              <span className="font-sans-luxury text-[11px] tracking-wider uppercase">TikTok</span>
+              <Music2 size={14} className="group-hover:scale-110 transition-transform" />
+              <span className="font-sans-luxury text-[11px] tracking-wider uppercase font-semibold">TikTok</span>
             </a>
 
-            <span className="text-white/20">·</span>
+            <span className="text-[#EADBCE]">·</span>
 
             {/* Facebook */}
             <a
               href="https://www.facebook.com/profile.php?id=61591562833010"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-[#6B5E55] hover:text-[#A67C2E] transition-colors group"
               aria-label="Facebook"
             >
               <Facebook size={14} className="group-hover:scale-110 transition-transform" />
-              <span className="font-sans-luxury text-[11px] tracking-wider uppercase">Facebook</span>
+              <span className="font-sans-luxury text-[11px] tracking-wider uppercase font-semibold">Facebook</span>
             </a>
 
-            <span className="text-white/20">·</span>
+            <span className="text-[#EADBCE]">·</span>
 
             {/* Email Contact */}
             <a
               href="mailto:contact.everafterinvites@gmail.com"
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-[#6B5E55] hover:text-[#A67C2E] transition-colors group"
               aria-label="Email Everafterinvites"
             >
               <Mail size={14} className="group-hover:scale-110 transition-transform" />
-              <span className="font-sans-luxury text-[11px] tracking-wider uppercase">Contact</span>
+              <span className="font-sans-luxury text-[11px] tracking-wider uppercase font-semibold">Contact</span>
             </a>
           </div>
 
-          {/* Organizer Portal & Hashtag */}
-          <div className="flex items-center gap-4 pt-3 text-[10px] font-sans-luxury tracking-[0.25em] text-white/30 uppercase">
+          {/* Hashtag & Organizer Portal */}
+          <div className="flex items-center gap-4 pt-2 text-[10px] font-sans-luxury tracking-[0.25em] text-[#8C7D70] uppercase">
             <span>#ZAINABANDHASAN</span>
             <span>·</span>
             <button
               onClick={handleAdminToggle}
-              className="hover:text-white/70 transition-colors flex items-center gap-1 cursor-pointer focus:outline-none"
+              className="hover:text-[#2B2421] transition-colors flex items-center gap-1 cursor-pointer focus:outline-none"
             >
               <Lock size={10} />
               <span>Organizer Portal</span>

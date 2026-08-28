@@ -12,8 +12,8 @@
 
   html {
     scroll-behavior: smooth;
-    background-color: #080808;
-    color: #F4F2ED;
+    background-color: #FAF7F2;
+    color: #2B2421;
   }
 }
 
@@ -41,6 +41,19 @@
   font-family: var(--font-arabic-sans);
 }
 
+/* Warm metallic gradient utility */
+.gold-text-gradient {
+  background: linear-gradient(135deg, #B8934A 0%, #D4AF37 50%, #A67C2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rose-gold-gradient {
+  background: linear-gradient(135deg, #D49B9E 0%, #E8C5C8 50%, #C27D7D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Hide scrollbar while preserving scrolling function */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -50,9 +63,9 @@
   scrollbar-width: none;
 }
 
-/* Subtle luxury film grain effect overlay */
+/* Subtle luxury warm film grain effect overlay */
 .film-grain {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 /* Subtle slow zoom animation for cinematic hero */
@@ -70,6 +83,43 @@
 
 .animate-cinematic-zoom {
   animation: cinematicZoom 28s ease-in-out infinite alternate;
+}
+
+/* Infinite GPU-accelerated horizontal marquee for polaroid gallery */
+@keyframes marqueeScrollLTR {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marqueeScrollRTL {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+
+.animate-marquee-ltr {
+  display: flex;
+  width: max-content;
+  animation: marqueeScrollLTR 50s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-rtl {
+  display: flex;
+  width: max-content;
+  animation: marqueeScrollRTL 50s linear infinite;
+  will-change: transform;
+}
+
+.marquee-paused {
+  animation-play-state: paused !important;
 }
 
 /* Soft pulse for playing audio */

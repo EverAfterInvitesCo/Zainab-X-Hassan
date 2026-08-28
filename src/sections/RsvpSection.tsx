@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Check, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { motion } from 'motion/react';
+import { Check, CheckCircle2 } from 'lucide-react';
 import { RSVPRecord } from '../types';
 import { dataStore } from '../services/dataStore';
 
 export const RsvpSection: React.FC = () => {
-  const { t, language } = useLanguage();
-
   const [name, setName] = useState<string>('');
   const [attending, setAttending] = useState<'yes' | 'no'>('yes');
-  const [guestCount, setGuestCount] = useState<number>(1);
-  const [contact, setContact] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -28,9 +22,6 @@ export const RsvpSection: React.FC = () => {
         setSavedRecord(parsed);
         setName(parsed.name || '');
         setAttending(parsed.attending || 'yes');
-        setGuestCount(parsed.guestCount || 1);
-        setContact(parsed.contact || '');
-        setNotes(parsed.notes || '');
       } catch (e) {
         // ignore
       }
@@ -40,7 +31,7 @@ export const RsvpSection: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMessage(language === 'ar' ? 'يرجى كتابة الاسم' : 'Please enter your name.');
+      setErrorMessage('Please enter your full name · يرجى كتابة الاسم الكريم');
       return;
     }
 
@@ -51,9 +42,8 @@ export const RsvpSection: React.FC = () => {
       const result = await dataStore.submitRsvp({
         name: name.trim(),
         attending,
-        guestCount: attending === 'yes' ? guestCount : 0,
-        contact: contact.trim(),
-        notes: notes.trim(),
+        guestCount: attending === 'yes' ? 1 : 0,
+        notes: '',
       });
 
       if (result.success) {
@@ -61,7 +51,7 @@ export const RsvpSection: React.FC = () => {
         setSavedRecord(result.rsvp);
         localStorage.setItem('zh_saved_rsvp', JSON.stringify(result.rsvp));
       } else {
-        setErrorMessage('Failed to submit RSVP.');
+        setErrorMessage('Failed to submit RSVP. Please try again.');
       }
     } catch (err) {
       console.error('RSVP submission error:', err);
@@ -74,129 +64,128 @@ export const RsvpSection: React.FC = () => {
   return (
     <section
       id="rsvp"
-      className="relative w-full py-28 md:py-40 bg-[#080808] text-[#F4F2ED] overflow-hidden"
+      className="relative w-full py-28 md:py-36 bg-[#FAF7F2] text-[#2B2421] overflow-hidden"
     >
-      {/* Background Subtle Gradient & Border Frame */}
-      <div className="max-w-3xl mx-auto px-6 md:px-12 relative z-10">
-        <div className="border border-white/20 p-8 sm:p-12 md:p-16 bg-black/70 backdrop-blur-xl relative rounded-xl shadow-2xl">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <span className="text-[11px] md:text-xs tracking-[0.45em] uppercase text-white/50 font-sans-luxury block mb-3">
-              {t.rsvp.heading}
-            </span>
-            <h2 className="font-display-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#F4F2ED] uppercase tracking-[0.18em]">
-              {language === 'ar' ? 'تأكيد الحضور' : 'RESPONSE REQUESTED'}
+      {/* Background Subtle Luxury Radial Lighting */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-full pointer-events-none">
+        <div className="w-full h-full bg-[radial-gradient(circle_at_center,#F5E5E2_0%,transparent_70%)] opacity-50 blur-2xl" />
+      </div>
+
+      <div className="max-w-xl mx-auto px-6 relative z-10">
+        <div className="border border-[#EADBCE] p-8 sm:p-12 md:p-14 bg-[#FFFFFF] rounded-3xl shadow-[0_20px_60px_rgba(180,140,110,0.12)] relative">
+          {/* Section Header - ENGLISH FIRST, ARABIC BENEATH */}
+          <div className="text-center mb-8">
+            <h2 className="font-display-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#2B2421] uppercase tracking-[0.18em]">
+              KINDLY RSVP
             </h2>
-            <p className="font-serif-luxury italic text-lg sm:text-xl text-white/60 mt-3 font-light">
-              {t.rsvp.subtitle}
-            </p>
+            <h3 className="font-arabic-calligraphy text-3xl sm:text-4xl text-[#A67C2E] mt-1">
+              تأكيد الحضور
+            </h3>
           </div>
 
-          {/* CRITICAL: ADULTS-ONLY CELEBRATION NOTICE (HIGHLIGHTED IN RED) */}
-          <div className="mb-10 p-4 sm:p-5 bg-red-950/40 border border-red-500/60 rounded-lg flex items-start gap-3.5 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
-            <AlertCircle size={20} className="text-red-400 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-sans-luxury tracking-[0.2em] uppercase text-red-400 font-bold mb-1 flex items-center gap-2">
-                <span>{t.rsvp.adultsOnlyNoticeTitle}</span>
-                <span className="text-[10px] px-1.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/30 rounded tracking-widest font-normal">
-                  {language === 'ar' ? 'ممنوع اصطحاب الأطفال' : 'NO KIDS'}
-                </span>
-              </h4>
-              <p className="text-xs font-sans-luxury text-red-200/90 leading-relaxed font-light">
-                {t.rsvp.adultsOnlyNoticeText}
-              </p>
-            </div>
+          {/* CRITICAL: ADULTS-ONLY CELEBRATION NOTICE */}
+          <div className="mb-8 p-5 bg-[#FAF0ED] border-2 border-[#D49B9E] rounded-2xl shadow-sm text-center">
+            <p className="font-sans-luxury text-xs sm:text-sm uppercase tracking-[0.15em] text-[#9E3E43] font-bold">
+              ADULTS-ONLY CELEBRATION — NO CHILDREN ARE ALLOWED
+            </p>
+            <p className="font-arabic text-sm sm:text-base text-[#9E3E43] font-bold mt-1" dir="rtl">
+              الحفل مخصص للكبار فقط — يُرجى بكل مودة عدم اصطحاب الأطفال
+            </p>
           </div>
 
           {isSuccess ? (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-8"
+              className="text-center py-6"
             >
-              <div className="w-16 h-16 rounded-full border border-white/30 flex items-center justify-center mx-auto mb-6 bg-white/5">
-                <CheckCircle2 size={32} className="text-white" />
+              <div className="w-16 h-16 rounded-full border border-[#C5A059] flex items-center justify-center mx-auto mb-5 bg-[#FAF7F2]">
+                <CheckCircle2 size={30} className="text-[#A67C2E]" />
               </div>
-              <h3 className="font-display-luxury text-2xl sm:text-3xl tracking-[0.2em] text-white uppercase font-light mb-3">
-                {t.rsvp.thankYouTitle}
-              </h3>
-              <p className="font-serif-luxury italic text-lg text-white/70 max-w-md mx-auto mb-8 font-light">
-                {t.rsvp.thankYouSubtitle}
+              <h4 className="font-display-luxury text-2xl sm:text-3xl tracking-[0.15em] text-[#2B2421] uppercase font-medium mb-1">
+                THANK YOU
+              </h4>
+              <p className="font-arabic-calligraphy text-2xl text-[#A67C2E] mb-3">
+                شكراً لتأكيدكم
+              </p>
+              <p className="font-serif-luxury italic text-base text-[#6B5E55] max-w-md mx-auto mb-6">
+                Your response has been warmly received and recorded.
               </p>
 
-              <div className="bg-white/[0.03] border border-white/10 p-4 rounded max-w-sm mx-auto text-xs font-sans-luxury text-white/70 mb-8 space-y-1.5">
+              <div className="bg-[#FAF7F2] border border-[#EADBCE] p-5 rounded-2xl max-w-sm mx-auto text-xs font-sans-luxury text-[#6B5E55] mb-6 space-y-2">
                 <p>
-                  <strong className="text-white uppercase tracking-wider">{savedRecord?.name}</strong>
+                  <strong className="text-[#2B2421] uppercase tracking-wider text-sm">{savedRecord?.name}</strong>
                 </p>
-                <p>
-                  {language === 'ar' ? 'الحالة:' : 'Status:'}{' '}
-                  <span className="text-white font-medium">
-                    {savedRecord?.attending === 'yes' ? t.rsvp.yesOption : t.rsvp.noOption}
+                <p className="flex justify-between items-center border-t border-[#EADBCE] pt-2">
+                  <span>Status / الحالة:</span>
+                  <span className="font-bold text-[#2B2421]">
+                    {savedRecord?.attending === 'yes' ? 'Attending · حاضر بكل سرور' : 'Declined · معتذر'}
                   </span>
                 </p>
-                {savedRecord?.attending === 'yes' && (
-                  <p>
-                    {language === 'ar' ? 'عدد المقاعد:' : 'Reserved Guests:'}{' '}
-                    <span className="text-white font-medium">{savedRecord.guestCount}</span>
-                  </p>
-                )}
               </div>
 
               <button
                 onClick={() => setIsSuccess(false)}
-                className="text-xs font-sans-luxury tracking-[0.25em] text-white/40 hover:text-white uppercase underline underline-offset-4 transition-colors"
+                className="text-xs font-sans-luxury tracking-[0.2em] text-[#8C7D70] hover:text-[#2B2421] uppercase underline underline-offset-4 transition-colors cursor-pointer"
               >
-                {t.rsvp.changeResponse}
+                EDIT RESPONSE · تعديل الرد
               </button>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {errorMessage && (
-                <div className="p-3 bg-red-950/50 border border-red-500/30 text-red-200 text-xs font-sans-luxury rounded">
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-sans-luxury rounded-xl">
                   {errorMessage}
                 </div>
               )}
 
-              {/* Guest Name */}
+              {/* Guest Full Name */}
               <div>
-                <label className="block text-[11px] font-sans-luxury tracking-[0.2em] text-white/60 uppercase mb-2">
-                  {t.rsvp.nameLabel} <span className="text-white">*</span>
+                <label className="block text-[11px] font-sans-luxury tracking-[0.15em] text-[#2B2421] uppercase font-bold mb-2">
+                  FULL NAME / الاسم الكريم <span className="text-[#A67C2E]">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={t.rsvp.namePlaceholder}
-                  className="w-full bg-white/[0.04] border border-white/20 focus:border-white text-[#F4F2ED] px-4 py-3.5 text-sm font-sans-luxury focus:outline-none transition-colors rounded-none placeholder:text-white/25"
+                  placeholder=""
+                  className="w-full bg-[#FAF7F2] border border-[#EADBCE] focus:border-[#C5A059] text-[#2B2421] px-4 py-3.5 text-sm font-sans-luxury focus:outline-none transition-colors rounded-xl"
                 />
               </div>
 
               {/* Attendance Selection */}
               <div>
-                <label className="block text-[11px] font-sans-luxury tracking-[0.2em] text-white/60 uppercase mb-3">
-                  {t.rsvp.question} <span className="text-white">*</span>
+                <label className="block text-[11px] font-sans-luxury tracking-[0.15em] text-[#2B2421] uppercase font-bold mb-2.5">
+                  WILL YOU JOIN US? / هل ستشاركوننا الحفل؟ <span className="text-[#A67C2E]">*</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {/* YES Option */}
                   <button
                     type="button"
                     onClick={() => setAttending('yes')}
-                    className={`py-4 px-5 text-left border flex items-center justify-between transition-all duration-300 ${
+                    className={`py-3.5 px-4 rounded-xl border flex items-center justify-between transition-all duration-300 cursor-pointer ${
                       attending === 'yes'
-                        ? 'border-white bg-[#F4F2ED] text-[#080808]'
-                        : 'border-white/20 bg-white/[0.02] text-white/70 hover:border-white/40'
+                        ? 'border-[#C5A059] bg-[#FAF7F2] text-[#2B2421] shadow-sm'
+                        : 'border-[#EADBCE] bg-[#FFFFFF] text-[#6B5E55] hover:border-[#C5A059]/50'
                     }`}
                   >
-                    <span className="font-sans-luxury text-xs tracking-[0.2em] uppercase font-semibold">
-                      {t.rsvp.yesOption}
-                    </span>
+                    <div>
+                      <span className="font-sans-luxury text-xs tracking-[0.15em] uppercase font-bold block">
+                        YES, WITH PLEASURE
+                      </span>
+                      <span className="font-arabic text-xs text-[#8C7D70]">
+                        نعم، بكل سرور
+                      </span>
+                    </div>
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        attending === 'yes' ? 'border-black bg-black text-white' : 'border-white/40'
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        attending === 'yes'
+                          ? 'border-[#C5A059] bg-[#C5A059] text-white'
+                          : 'border-[#EADBCE]'
                       }`}
                     >
-                      {attending === 'yes' && <Check size={10} />}
+                      {attending === 'yes' && <Check size={12} />}
                     </div>
                   </button>
 
@@ -204,90 +193,42 @@ export const RsvpSection: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAttending('no')}
-                    className={`py-4 px-5 text-left border flex items-center justify-between transition-all duration-300 ${
+                    className={`py-3.5 px-4 rounded-xl border flex items-center justify-between transition-all duration-300 cursor-pointer ${
                       attending === 'no'
-                        ? 'border-white bg-[#F4F2ED] text-[#080808]'
-                        : 'border-white/20 bg-white/[0.02] text-white/70 hover:border-white/40'
+                        ? 'border-[#C5A059] bg-[#FAF7F2] text-[#2B2421] shadow-sm'
+                        : 'border-[#EADBCE] bg-[#FFFFFF] text-[#6B5E55] hover:border-[#C5A059]/50'
                     }`}
                   >
-                    <span className="font-sans-luxury text-xs tracking-[0.2em] uppercase font-semibold">
-                      {t.rsvp.noOption}
-                    </span>
+                    <div>
+                      <span className="font-sans-luxury text-xs tracking-[0.15em] uppercase font-bold block">
+                        REGRETFULLY DECLINE
+                      </span>
+                      <span className="font-arabic text-xs text-[#8C7D70]">
+                        نعتذر عن الحضور
+                      </span>
+                    </div>
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        attending === 'no' ? 'border-black bg-black text-white' : 'border-white/40'
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        attending === 'no'
+                          ? 'border-[#C5A059] bg-[#C5A059] text-white'
+                          : 'border-[#EADBCE]'
                       }`}
                     >
-                      {attending === 'no' && <Check size={10} />}
+                      {attending === 'no' && <Check size={12} />}
                     </div>
                   </button>
                 </div>
               </div>
 
-              {/* Guest Count (only if attending is yes) */}
-              {attending === 'yes' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="overflow-hidden"
-                >
-                  <label className="block text-[11px] font-sans-luxury tracking-[0.2em] text-white/60 uppercase mb-2">
-                    {t.rsvp.guestCountLabel}
-                  </label>
-                  <div className="flex items-center gap-3">
-                    {[1, 2, 3, 4].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setGuestCount(num)}
-                        className={`w-12 h-12 flex items-center justify-center font-sans-luxury text-sm border transition-all ${
-                          guestCount === num
-                            ? 'border-white bg-white text-black font-bold'
-                            : 'border-white/20 bg-white/[0.02] text-white/70 hover:border-white/40'
-                        }`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Contact Information */}
-              <div>
-                <label className="block text-[11px] font-sans-luxury tracking-[0.2em] text-white/60 uppercase mb-2">
-                  {t.rsvp.contactLabel}
-                </label>
-                <input
-                  type="text"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder={t.rsvp.contactPlaceholder}
-                  className="w-full bg-white/[0.04] border border-white/20 focus:border-white text-[#F4F2ED] px-4 py-3.5 text-sm font-sans-luxury focus:outline-none transition-colors rounded-none placeholder:text-white/25"
-                />
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-[11px] font-sans-luxury tracking-[0.2em] text-white/60 uppercase mb-2">
-                  {t.rsvp.notesLabel}
-                </label>
-                <textarea
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t.rsvp.notesPlaceholder}
-                  className="w-full bg-white/[0.04] border border-white/20 focus:border-white text-[#F4F2ED] px-4 py-3 text-sm font-sans-luxury focus:outline-none transition-colors rounded-none placeholder:text-white/25 resize-none"
-                />
-              </div>
-
-              {/* Submit Button */}
+              {/* Submit Button in Bespoke Luxury Stationery Styling */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 bg-[#F4F2ED] text-[#080808] hover:bg-white text-xs font-sans-luxury tracking-[0.35em] uppercase font-semibold transition-all duration-300 flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+                className="w-full py-4 bg-[#2B2421] hover:bg-[#3D332F] border border-[#C5A059] text-[#FAF7F2] text-xs font-sans-luxury tracking-[0.25em] uppercase font-bold rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(43,36,33,0.15)] hover:shadow-[0_15px_35px_rgba(197,160,89,0.25)] hover:scale-[1.01] cursor-pointer disabled:opacity-50 mt-2"
               >
-                <span>{isSubmitting ? t.rsvp.submittingButton : t.rsvp.submitButton}</span>
+                <span>{isSubmitting ? 'CONFIRMING...' : 'CONFIRM RSVP'}</span>
+                <span className="w-1 h-1 rounded-full bg-[#C5A059]" />
+                <span className="font-arabic font-normal text-sm text-[#EADBCE]">تأكيد الحضور</span>
               </button>
             </form>
           )}

@@ -1,217 +1,163 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X, Maximize2, Pause, Play } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
 import { PolaroidPhoto } from '../types';
 
-// Strictly use 1-8 and 10 (NEVER 9.jpg)
 const galleryPhotos: PolaroidPhoto[] = [
   {
     id: '1',
     src: '/media/1.jpg',
-    titleEn: 'THE PROMISE',
-    titleAr: 'الوعد الأبدي',
-    captionEn: 'Vol. 01 — Dubai',
-    captionAr: 'المجلد ١ — دبي',
-    rotation: -2.2,
-    offsetY: 4,
+    titleEn: 'The First Glance',
+    titleAr: 'النظرة الأولى',
+    captionEn: 'Vol. 01 — The First Glance',
+    captionAr: 'المجلد ٠١ — النظرة الأولى',
+    rotation: -2,
+    offsetY: 0,
   },
   {
     id: '2',
     src: '/media/2.jpg',
-    titleEn: 'EMBRACE',
-    titleAr: 'لحظة هدوء',
-    captionEn: 'Vol. 02 — A Quiet Moment',
-    captionAr: 'المجلد ٢ — دفء اللقاء',
-    rotation: 1.8,
-    offsetY: -6,
+    titleEn: 'Under Golden Lights',
+    titleAr: 'تحت الأضواء الذهبية',
+    captionEn: 'Vol. 02 — Under Golden Lights',
+    captionAr: 'المجلد ٠٢ — تحت الأضواء الذهبية',
+    rotation: 2.5,
+    offsetY: 6,
   },
   {
     id: '3',
     src: '/media/3.jpg',
-    titleEn: 'DEVOTION',
-    titleAr: 'وفاء',
-    captionEn: 'Vol. 03 — Hand in Hand',
-    captionAr: 'المجلد ٣ — يداً بيد',
-    rotation: -1.2,
-    offsetY: 8,
+    titleEn: 'In Every Silence',
+    titleAr: 'في كل سكون',
+    captionEn: 'Vol. 03 — In Every Silence',
+    captionAr: 'المجلد ٠٣ — في كل سكون',
+    rotation: -1,
+    offsetY: -4,
   },
   {
     id: '4',
     src: '/media/4.jpg',
-    titleEn: 'ELEGANCE',
-    titleAr: 'أناقة وسحر',
-    captionEn: 'Vol. 04 — Couture Nocturne',
-    captionAr: 'المجلد ٤ — سحر الليل',
-    rotation: 2.5,
-    offsetY: -4,
+    titleEn: 'Promises Written',
+    titleAr: 'عهود كُتبت',
+    captionEn: 'Vol. 04 — Promises Written',
+    captionAr: 'المجلد ٠٤ — عهود كُتبت',
+    rotation: 3,
+    offsetY: 8,
   },
   {
     id: '5',
     src: '/media/5.jpg',
-    titleEn: 'WHISPER',
-    titleAr: 'همس الضياء',
-    captionEn: 'Vol. 05 — Shadow & Light',
-    captionAr: 'المجلد ٥ — ظلال وأضواء',
-    rotation: -1.8,
-    offsetY: 6,
+    titleEn: 'The Journey Begins',
+    titleAr: 'بداية الرحلة',
+    captionEn: 'Vol. 05 — The Journey Begins',
+    captionAr: 'المجلد ٠٥ — بداية الرحلة',
+    rotation: -2.5,
+    offsetY: -6,
   },
   {
     id: '6',
     src: '/media/6.jpg',
-    titleEn: 'SERENITY',
-    titleAr: 'سكينة',
-    captionEn: 'Vol. 06 — Walking Forward',
-    captionAr: 'المجلد ٦ — نحو المستقبل',
-    rotation: 1.4,
-    offsetY: -8,
+    titleEn: 'Everlasting Love',
+    titleAr: 'حب خالد',
+    captionEn: 'Vol. 06 — Everlasting Love',
+    captionAr: 'المجلد ٠٦ — حب خالد',
+    rotation: 1.5,
+    offsetY: 4,
   },
   {
     id: '7',
     src: '/media/7.jpg',
-    titleEn: 'PORTRAIT',
-    titleAr: 'بورتريه كلاسيكي',
-    captionEn: 'Vol. 07 — The Union',
-    captionAr: 'المجلد ٧ — لقاء القلوب',
-    rotation: -2.6,
-    offsetY: 5,
+    titleEn: 'Sacred Vows',
+    titleAr: 'العهود المقدسة',
+    captionEn: 'Vol. 07 — Sacred Vows',
+    captionAr: 'المجلد ٠٧ — العهود المقدسة',
+    rotation: -3,
+    offsetY: 2,
   },
   {
     id: '8',
     src: '/media/8.jpg',
-    titleEn: 'JOURNEY',
-    titleAr: 'رحلة العمر',
-    captionEn: 'Vol. 08 — Forever Begins',
-    captionAr: 'المجلد ٨ — بداية الأبدية',
-    rotation: 2.0,
-    offsetY: -5,
+    titleEn: 'Two Souls, One Path',
+    titleAr: 'روحان، درب واحد',
+    captionEn: 'Vol. 08 — Two Souls, One Path',
+    captionAr: 'المجلد ٠٨ — روحان، درب واحد',
+    rotation: 2,
+    offsetY: -3,
+  },
+  {
+    id: '9',
+    src: '/media/9.jpg',
+    titleEn: 'Eternal Bond',
+    titleAr: 'رباط أبدي',
+    captionEn: 'Vol. 09 — Eternal Bond',
+    captionAr: 'المجلد ٠٩ — رباط أبدي',
+    rotation: -1,
+    offsetY: 6,
   },
   {
     id: '10',
     src: '/media/10.jpg',
-    titleEn: 'CELEBRATION',
-    titleAr: 'ليلة العمر',
-    captionEn: 'Vol. 10 — Our Wedding Night',
+    titleEn: 'The Wedding Night',
+    titleAr: 'ليلة الزفاف',
+    captionEn: 'Vol. 10 — The Wedding Night',
     captionAr: 'المجلد ١٠ — ليلة الزفاف',
     rotation: -1.5,
     offsetY: 4,
   },
 ];
 
-// Duplicated list for seamless infinite loop
+// Duplicated list for seamless infinite horizontal scroll
 const infiniteGallery = [...galleryPhotos, ...galleryPhotos];
 
 export const PolaroidMemoriesSection: React.FC = () => {
-  const { t, language, isRtl } = useLanguage();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activePhoto, setActivePhoto] = useState<PolaroidPhoto | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const isInteractingRef = useRef<boolean>(false);
-  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Smooth continuous automatic horizontal scroll loop
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    let animationFrameId: number;
-    let lastTime = performance.now();
-    const scrollSpeed = 0.55; // Pixels per frame at 60fps (~33px/sec)
-
-    const step = (currentTime: number) => {
-      const delta = Math.min(currentTime - lastTime, 50);
-      lastTime = currentTime;
-
-      if (!isPaused && !isInteractingRef.current && container) {
-        const halfWidth = container.scrollWidth / 2;
-
-        if (isRtl) {
-          container.scrollLeft -= (scrollSpeed * delta) / 16.67;
-          if (Math.abs(container.scrollLeft) >= halfWidth) {
-            container.scrollLeft = 0;
-          }
-        } else {
-          container.scrollLeft += (scrollSpeed * delta) / 16.67;
-          if (container.scrollLeft >= halfWidth) {
-            container.scrollLeft -= halfWidth;
-          }
-        }
-      }
-
-      animationFrameId = requestAnimationFrame(step);
-    };
-
-    animationFrameId = requestAnimationFrame(step);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
-    };
-  }, [isPaused, isRtl]);
-
-  const handleUserInteractionStart = () => {
-    isInteractingRef.current = true;
-    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
-  };
-
-  const handleUserInteractionEnd = () => {
-    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
-    resumeTimeoutRef.current = setTimeout(() => {
-      isInteractingRef.current = false;
-    }, 2000);
-  };
 
   const scrollLeft = () => {
-    handleUserInteractionStart();
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: isRtl ? 380 : -380, behavior: 'smooth' });
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
     }
-    handleUserInteractionEnd();
   };
 
   const scrollRight = () => {
-    handleUserInteractionStart();
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: isRtl ? -380 : 380, behavior: 'smooth' });
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
     }
-    handleUserInteractionEnd();
   };
 
   return (
     <section
       id="memories"
-      className="relative w-full py-28 md:py-40 bg-[#080808] text-[#F4F2ED] overflow-hidden"
+      className="relative w-full py-24 sm:py-32 md:py-36 bg-[#FAF7F2] text-[#2B2421] overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 mb-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 mb-8 sm:mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EADBCE] pb-8">
           <div>
-            <span className="text-[11px] md:text-xs tracking-[0.45em] uppercase text-white/50 font-sans-luxury block mb-3">
-              {language === 'ar' ? 'الذكريات' : 'MEMORIES'}
-            </span>
-            <h2 className="font-display-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#F4F2ED] uppercase tracking-[0.18em]">
-              {language === 'ar' ? 'ذكرياتنا' : 'OUR MEMORIES'}
+            <h2 className="font-display-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#2B2421] uppercase tracking-[0.18em]">
+              OUR MEMORIES
             </h2>
+            <h3 className="font-arabic-calligraphy text-3xl sm:text-4xl text-[#A67C2E] mt-1">
+              ذكرياتنا الجميلة
+            </h3>
           </div>
 
-          {/* Desktop scroll navigation controls & Auto-play toggle */}
-          <div className="flex items-center gap-4">
+          {/* Scroll navigation controls & Auto-play toggle */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full md:w-auto">
             <button
               onClick={() => setIsPaused(!isPaused)}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 hover:border-white/40 text-[11px] font-sans-luxury tracking-[0.2em] uppercase text-white/60 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#C5A059]/40 hover:border-[#C5A059] text-xs font-sans-luxury tracking-[0.15em] uppercase text-[#2B2421] hover:text-[#A67C2E] transition-all bg-[#FFFFFF] shadow-sm cursor-pointer"
               title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
             >
-              {isPaused ? <Play size={12} className="text-emerald-400" /> : <Pause size={12} />}
-              <span>{isPaused ? (language === 'ar' ? 'تشغيل' : 'AUTO-SCROLL') : (language === 'ar' ? 'إيقاف' : 'AUTO-SCROLLING')}</span>
+              {isPaused ? <Play size={12} className="text-[#A67C2E] fill-[#A67C2E]" /> : <Pause size={12} />}
+              <span>{isPaused ? 'AUTO-SCROLL' : 'SCROLLING'}</span>
             </button>
 
-            <span className="text-xs font-sans-luxury tracking-[0.2em] text-white/40 uppercase hidden sm:inline">
-              {t.memories.scrollInstruction}
-            </span>
             <div className="flex items-center gap-2">
               <button
                 id="zh-polaroid-scroll-left"
                 onClick={scrollLeft}
-                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
+                className="w-10 h-10 rounded-full border border-[#EADBCE] hover:border-[#C5A059] bg-[#FFFFFF] text-[#2B2421] hover:text-[#A67C2E] flex items-center justify-center transition-all shadow-sm focus:outline-none cursor-pointer"
                 aria-label="Scroll gallery left"
               >
                 <ChevronLeft size={18} />
@@ -219,7 +165,7 @@ export const PolaroidMemoriesSection: React.FC = () => {
               <button
                 id="zh-polaroid-scroll-right"
                 onClick={scrollRight}
-                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
+                className="w-10 h-10 rounded-full border border-[#EADBCE] hover:border-[#C5A059] bg-[#FFFFFF] text-[#2B2421] hover:text-[#A67C2E] flex items-center justify-center transition-all shadow-sm focus:outline-none cursor-pointer"
                 aria-label="Scroll gallery right"
               >
                 <ChevronRight size={18} />
@@ -229,47 +175,49 @@ export const PolaroidMemoriesSection: React.FC = () => {
         </div>
       </div>
 
-      {/* HORIZONTAL SCROLL RUNWAY - CONTINUOUS AUTO-SCROLL */}
+      {/* HORIZONTAL AUTO-SCROLL RUNWAY */}
       <div
         ref={scrollContainerRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        onTouchStart={handleUserInteractionStart}
-        onTouchEnd={handleUserInteractionEnd}
-        className="w-full overflow-x-auto no-scrollbar py-8 px-6 md:px-12 cursor-grab active:cursor-grabbing"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        className="w-full overflow-x-auto no-scrollbar py-6 sm:py-8 px-4 sm:px-8 touch-pan-x cursor-grab active:cursor-grabbing"
       >
-        <div className="flex items-center gap-8 md:gap-12 min-w-max pb-6">
+        <div
+          className={`animate-marquee-ltr ${isPaused ? 'marquee-paused' : ''} flex items-center gap-6 sm:gap-8 md:gap-10 pb-6`}
+        >
           {infiniteGallery.map((photo, index) => (
-            <motion.div
+            <div
               key={`${photo.id}-${index}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.3 } }}
               onClick={() => setActivePhoto(photo)}
               style={{
                 transform: `rotate(${photo.rotation}deg) translateY(${photo.offsetY}px)`,
               }}
-              className="group relative bg-[#F6F5F2] text-[#111111] p-3.5 pb-6 sm:p-4 sm:pb-8 rounded-[3px] shadow-[0_20px_40px_rgba(0,0,0,0.85)] hover:shadow-[0_25px_50px_rgba(255,255,255,0.08)] cursor-pointer transition-shadow duration-300 w-[260px] sm:w-[300px] md:w-[330px] shrink-0 select-none"
+              className="group relative bg-[#FFFDF9] text-[#2B2421] p-3.5 pb-6 sm:p-4 sm:pb-7 rounded-lg border border-[#EADBCE] shadow-[0_15px_35px_rgba(180,140,110,0.12)] hover:shadow-[0_20px_45px_rgba(180,140,110,0.22)] cursor-pointer transition-all duration-300 w-[230px] sm:w-[280px] md:w-[310px] shrink-0 select-none hover:-translate-y-2 hover:border-[#C5A059]"
             >
               {/* Photo Area */}
-              <div className="relative aspect-[4/5] bg-[#141414] overflow-hidden rounded-[2px]">
+              <div className="relative aspect-[4/5] bg-[#FAF7F2] overflow-hidden rounded">
                 <img
                   src={photo.src}
                   alt={`Memory ${photo.id}`}
-                  className="w-full h-full object-cover grayscale contrast-115 group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out contrast-[1.02] brightness-[0.95]"
                   loading="lazy"
+                  draggable={false}
                 />
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                <div className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 bg-[#C5A059]/5 group-hover:bg-transparent transition-colors" />
+                <div className="absolute top-2 right-2 p-1.5 bg-[#2B2421]/70 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                   <Maximize2 size={12} />
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
+      </div>
+
+      {/* Mobile Touch Instruction */}
+      <div className="text-center mt-2 sm:mt-4 md:hidden">
+        <p className="text-[10px] font-sans-luxury tracking-[0.25em] text-[#8C7D70] uppercase">
+          TAP ANY PHOTO TO ENLARGE · انقر على الصورة للتكبير
+        </p>
       </div>
 
       {/* Full-screen Lightbox Modal */}
@@ -280,11 +228,11 @@ export const PolaroidMemoriesSection: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActivePhoto(null)}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8"
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
           >
             <button
               onClick={() => setActivePhoto(null)}
-              className="absolute top-6 right-6 p-3 text-white/70 hover:text-white rounded-full bg-white/10 transition-colors"
+              className="absolute top-6 right-6 p-3 text-white/80 hover:text-white rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
               aria-label="Close photo preview"
             >
               <X size={24} />
@@ -292,13 +240,13 @@ export const PolaroidMemoriesSection: React.FC = () => {
 
             <div
               onClick={(e) => e.stopPropagation()}
-              className="max-w-3xl max-h-[85vh] flex flex-col items-center bg-[#F6F5F2] text-[#111] p-3 sm:p-5 pb-6 sm:pb-8 rounded-[4px] shadow-2xl overflow-hidden"
+              className="max-w-2xl max-h-[85vh] flex flex-col items-center bg-[#FFFDF9] text-[#2B2421] p-3 sm:p-4 rounded-2xl shadow-2xl overflow-hidden border border-[#EADBCE]"
             >
-              <div className="relative w-full max-h-[75vh] overflow-hidden rounded-[2px] bg-black">
+              <div className="relative w-full max-h-[75vh] overflow-hidden rounded-lg bg-black/5">
                 <img
                   src={activePhoto.src}
                   alt={`Memory ${activePhoto.id}`}
-                  className="w-full h-full max-h-[75vh] object-contain grayscale contrast-110"
+                  className="w-full h-full max-h-[75vh] object-contain"
                 />
               </div>
             </div>
