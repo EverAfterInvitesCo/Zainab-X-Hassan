@@ -12,9 +12,14 @@ import {
   ArrowLeft,
   RefreshCw,
   LogOut,
+  Database,
+  Copy,
+  Check,
+  X,
 } from 'lucide-react';
 import { RSVPRecord, GuestbookRecord, AdminStats } from '../types';
 import { dataStore } from '../services/dataStore';
+import { SUPABASE_SETUP_SQL } from '../services/supabase';
 
 interface AdminPortalProps {
   onBack: () => void;
@@ -27,6 +32,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
+  const [copiedSql, setCopiedSql] = useState<boolean>(false);
 
   // Active Tab: rsvps or guestbook
   const [activeTab, setActiveTab] = useState<'rsvps' | 'guestbook'>('rsvps');
@@ -304,6 +311,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowSqlModal(true)}
+            className="inline-flex items-center gap-2 px-3 py-2.5 bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/80 text-xs font-sans-luxury tracking-wider uppercase rounded transition-colors"
+            title="Supabase Cloud DB Status & Schema"
+          >
+            <Database size={14} className="text-emerald-400" />
+            <span className="hidden sm:inline">Supabase Cloud</span>
+          </button>
+
           <button
             onClick={activeTab === 'guestbook' ? handleExportGuestbookCsv : handleExportCsv}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-black hover:bg-white/90 text-xs font-sans-luxury tracking-widest uppercase font-semibold rounded transition-colors shadow-lg"
@@ -673,6 +689,84 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
         </div>
         )}
       </div>
+
+      {/* SUPABASE SQL & CLOUD SETUP MODAL */}
+      {showSqlModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#141414] border border-white/20 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400">
+                  <Database size={16} />
+                </div>
+                <div>
+                  <h3 className="font-display-luxury text-lg text-white font-light">
+                    Supabase Cloud Database
+                  </h3>
+                  <p className="text-xs text-white/50 font-sans-luxury">
+                    Project: <code className="text-emerald-400 font-mono">bdznvazjusxevdtdtuvr</code>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSqlModal(false)}
+                className="p-2 text-white/50 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs font-sans-luxury leading-relaxed text-white/70">
+              <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-lg p-4">
+                <p className="text-emerald-300 font-medium mb-1">
+                  ✓ Connected to Supabase
+                </p>
+                <p className="text-white/60 text-[11px]">
+                  All RSVP responses and guestbook notes from incognito tabs, mobile phones, and guests are saved directly into your cloud database.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-white font-semibold uppercase tracking-wider text-[11px]">
+                    SQL Schema Script (Optional: if creating tables fresh)
+                  </label>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(SUPABASE_SETUP_SQL);
+                      setCopiedSql(true);
+                      setTimeout(() => setCopiedSql(false), 2500);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-black hover:bg-white/90 rounded text-[11px] font-semibold transition-colors"
+                  >
+                    {copiedSql ? (
+                      <>
+                        <Check size={12} className="text-green-600" /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={12} /> Copy SQL
+                      </>
+                    )}
+                  </button>
+                </div>
+                <pre className="bg-black border border-white/10 rounded-lg p-4 text-[11px] font-mono text-emerald-300/90 overflow-x-auto max-h-56">
+                  {SUPABASE_SETUP_SQL}
+                </pre>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-white/10 flex justify-end">
+              <button
+                onClick={() => setShowSqlModal(false)}
+                className="px-5 py-2 bg-white text-black hover:bg-white/90 text-xs font-sans-luxury tracking-widest uppercase font-semibold rounded transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
