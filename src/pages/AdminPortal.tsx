@@ -14,6 +14,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { RSVPRecord, GuestbookRecord, AdminStats } from '../types';
+import { dataStore } from '../services/dataStore';
 
 interface AdminPortalProps {
   onBack: () => void;
@@ -45,32 +46,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
     setLoading(true);
     setError('');
 
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
-      });
+    const cleanPin = (pin || '').trim().toUpperCase();
+    const isValid = await dataStore.loginAdmin(cleanPin);
 
-      if (res.ok) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem('zh_admin_auth', 'true');
-        loadAllData();
-      } else {
-        setError('Invalid security code. Please check your PIN.');
-      }
-    } catch (err) {
-      const cleanPin = (pin || '').trim().toUpperCase();
-      if (cleanPin === 'ZH2027' || cleanPin === '2027' || cleanPin === 'ADMIN') {
-        setIsAuthenticated(true);
-        sessionStorage.setItem('zh_admin_auth', 'true');
-        loadAllData();
-      } else {
-        setError('Invalid security code. Please check your PIN.');
-      }
-    } finally {
-      setLoading(false);
+    if (isValid) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('zh_admin_auth', 'true');
+      loadAllData();
+    } else {
+      setError('Invalid security code. Please check your PIN.');
     }
+    setLoading(false);
   };
 
   const handleLogout = () => {
@@ -82,15 +68,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [statsRes, rsvpsRes, gbRes] = await Promise.all([
-        fetch('/api/admin/stats'),
-        fetch('/api/rsvp'),
-        fetch('/api/guestbook?all=true'),
+      const [statsData, rsvpsData, gbData] = await Promise.all([
+        dataStore.getStats(),
+        dataStore.getRsvps(),
+        dataStore.getGuestbook(true),
       ]);
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (rsvpsRes.ok) setRsvps(await rsvpsRes.json());
-      if (gbRes.ok) setGuestbookNotes(await gbRes.json());
+      setStats(statsData);
+      setRsvps(rsvpsData);
+      setGuestbookNotes(gbData);
     } catch (err) {
       console.error('Error loading admin data:', err);
     } finally {
@@ -105,30 +91,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
   }, [isAuthenticated]);
 
   const handleGuestbookAction = async (id: string, newStatus: 'approved' | 'hidden') => {
-    try {
-      const res = await fetch(`/api/guestbook/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
-        loadAllData();
-      }
-    } catch (err) {
-      console.error('Action failed:', err);
-    }
+    await dataStore.updateGuestbookStatus(id, newStatus);
+    loadAllData();
   };
 
   const handleDeleteGuestbook = async (id: string) => {
     if (!confirm('Are you sure you want to permanently delete this note?')) return;
-    try {
-      const res = await fetch(`/api/guestbook/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        loadAllData();
-      }
-    } catch (err) {
-      console.error('Delete failed:', err);
-    }
+    await dataStore.deleteGuestbook(id);
+    loadAllData();
   };
 
   const handleClearAllGuestbook = async () => {
@@ -139,26 +109,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
     if (!confirm('Are you sure you want to permanently DELETE ALL guestbook messages? This action cannot be undone.')) {
       return;
     }
-    try {
-      const res = await fetch('/api/guestbook/all', { method: 'DELETE' });
-      if (res.ok) {
-        loadAllData();
-      }
-    } catch (err) {
-      console.error('Clear all guestbook failed:', err);
-    }
+    await dataStore.clearAllGuestbook();
+    loadAllData();
   };
 
   const handleDeleteRsvp = async (id: string) => {
     if (!confirm('Are you sure you want to delete this RSVP response?')) return;
-    try {
-      const res = await fetch(`/api/rsvp/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        loadAllData();
-      }
-    } catch (err) {
-      console.error('Delete failed:', err);
-    }
+    await dataStore.deleteRsvp(id);
+    loadAllData();
   };
 
   const handleClearAllRsvps = async () => {
@@ -169,14 +127,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
     if (!confirm('Are you sure you want to permanently DELETE ALL RSVP guest responses? This action cannot be undone.')) {
       return;
     }
-    try {
-      const res = await fetch('/api/rsvp/all', { method: 'DELETE' });
-      if (res.ok) {
-        loadAllData();
-      }
-    } catch (err) {
-      console.error('Clear all RSVPs failed:', err);
-    }
+    await dataStore.clearAllRsvps();
+    loadAllData();
   };
 
   const handleExportCsv = () => {
@@ -304,22 +256,29 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
               </div>
             )}
 
-            <input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="Enter Password"
-              className="w-full bg-white/[0.05] border border-white/20 focus:border-white text-white px-4 py-3.5 text-sm font-sans-luxury text-center tracking-[0.3em] focus:outline-none transition-colors"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="Enter Password (e.g. ZH2027)"
+                className="w-full bg-white/[0.05] border border-white/20 focus:border-white text-white px-4 py-3.5 text-sm font-sans-luxury text-center tracking-[0.2em] focus:outline-none transition-colors"
+                required
+                autoFocus
+              />
+            </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-[#F4F2ED] text-black hover:bg-white text-xs font-sans-luxury tracking-[0.3em] uppercase font-bold transition-all disabled:opacity-50"
+              className="w-full py-3.5 bg-[#F4F2ED] text-black hover:bg-white text-xs font-sans-luxury tracking-[0.3em] uppercase font-bold transition-all disabled:opacity-50 mt-1 cursor-pointer"
             >
               {loading ? 'AUTHENTICATING...' : 'ACCESS PORTAL'}
             </button>
+
+            <p className="text-[11px] text-white/40 font-sans-luxury tracking-wider mt-2">
+              Default Organizer PIN: <code className="text-white/80 font-mono font-bold">ZH2027</code> or <code className="text-white/80 font-mono font-bold">2027</code>
+            </p>
           </form>
         </motion.div>
       </div>

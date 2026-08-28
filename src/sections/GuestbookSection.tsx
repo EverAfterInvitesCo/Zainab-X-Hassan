@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Image as ImageIcon, Send, CheckCircle2, MessageSquare, Upload, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { GuestbookRecord } from '../types';
+import { dataStore } from '../services/dataStore';
 
 export const GuestbookSection: React.FC = () => {
   const { t, language } = useLanguage();
@@ -20,11 +21,8 @@ export const GuestbookSection: React.FC = () => {
 
   const fetchApprovedEntries = async () => {
     try {
-      const res = await fetch('/api/guestbook');
-      if (res.ok) {
-        const data = await res.json();
-        setEntries(data);
-      }
+      const data = await dataStore.getGuestbook(false);
+      setEntries(data);
     } catch (err) {
       console.error('Error fetching guestbook:', err);
     } finally {
@@ -82,41 +80,38 @@ export const GuestbookSection: React.FC = () => {
     setErrorMessage('');
 
     try {
-      let finalPhotoUrl = '';
+      let finalPhotoUrl = photoPreview;
       if (photoPreview) {
-        // Upload photo to server endpoint
-        const uploadRes = await fetch('/api/guestbook/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: photoPreview }),
-        });
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          finalPhotoUrl = uploadData.url;
-        } else {
-          finalPhotoUrl = photoPreview; // Fallback
+        // Upload photo to server endpoint if possible
+        try {
+          const uploadRes = await fetch('/api/guestbook/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: photoPreview }),
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            if (uploadData.url) finalPhotoUrl = uploadData.url;
+          }
+        } catch {
+          // Keep base64 preview as fallback
         }
       }
 
-      const res = await fetch('/api/guestbook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          message: message.trim(),
-          photoUrl: finalPhotoUrl,
-        }),
+      const result = await dataStore.submitGuestbook({
+        name: name.trim(),
+        message: message.trim(),
+        photoUrl: finalPhotoUrl,
       });
 
-      if (res.ok) {
+      if (result.success) {
         setSubmittedNotice(true);
         setName('');
         setMessage('');
         setPhotoPreview('');
         fetchApprovedEntries();
       } else {
-        const errorData = await res.json();
-        setErrorMessage(errorData.error || 'Failed to submit message.');
+        setErrorMessage('Failed to submit message.');
       }
     } catch (err) {
       console.error('Submission error:', err);

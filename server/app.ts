@@ -18,7 +18,7 @@ export function createApp() {
   // Default master PIN is ZH2027 or custom organizer password
   const ADMIN_PIN = (process.env.ADMIN_PIN || 'ZH2027').toUpperCase();
 
-  app.post('/api/admin/login', (req, res) => {
+  app.post(['/api/admin/login', '/admin/login'], (req, res) => {
     const { pin } = req.body;
     const cleanPin = (pin || '').toString().trim().toUpperCase();
     if (
@@ -34,7 +34,7 @@ export function createApp() {
   });
 
   // --- STATS OVERVIEW ---
-  app.get('/api/admin/stats', (req, res) => {
+  app.get(['/api/admin/stats', '/admin/stats'], (req, res) => {
     const db = readDb();
     const confirmedRsvps = db.rsvps.filter((r) => r.attending === 'yes');
     const declinedRsvps = db.rsvps.filter((r) => r.attending === 'no');
@@ -64,12 +64,12 @@ export function createApp() {
   });
 
   // --- RSVP API ---
-  app.get('/api/rsvp', (req, res) => {
+  app.get(['/api/rsvp', '/rsvp'], (req, res) => {
     const db = readDb();
     res.json(db.rsvps);
   });
 
-  app.post('/api/rsvp', (req, res) => {
+  app.post(['/api/rsvp', '/rsvp'], (req, res) => {
     const { name, attending, guestCount, contact, notes } = req.body;
 
     if (!name || !name.trim()) {
@@ -111,7 +111,7 @@ export function createApp() {
     res.json({ success: true, rsvp: newRecord, updated: existingIndex >= 0 });
   });
 
-  app.delete('/api/rsvp/:id', (req, res) => {
+  app.delete(['/api/rsvp/:id', '/rsvp/:id'], (req, res) => {
     const { id } = req.params;
     const db = readDb();
     if (id === 'all') {
@@ -125,7 +125,7 @@ export function createApp() {
   });
 
   // --- GUESTBOOK API ---
-  app.get('/api/guestbook', (req, res) => {
+  app.get(['/api/guestbook', '/guestbook'], (req, res) => {
     const db = readDb();
     const isAll = req.query.all === 'true';
     if (isAll) {
@@ -136,7 +136,7 @@ export function createApp() {
     res.json(approved);
   });
 
-  app.post('/api/guestbook', (req, res) => {
+  app.post(['/api/guestbook', '/guestbook'], (req, res) => {
     const { name, message, photoUrl } = req.body;
 
     if (!name || !name.trim() || !message || !message.trim()) {
@@ -159,7 +159,7 @@ export function createApp() {
     res.json({ success: true, entry: newEntry });
   });
 
-  app.patch('/api/guestbook/:id', (req, res) => {
+  app.patch(['/api/guestbook/:id', '/guestbook/:id'], (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
@@ -178,7 +178,7 @@ export function createApp() {
     res.json({ success: true, entry: target });
   });
 
-  app.delete('/api/guestbook/:id', (req, res) => {
+  app.delete(['/api/guestbook/:id', '/guestbook/:id'], (req, res) => {
     const { id } = req.params;
     const db = readDb();
     if (id === 'all') {
@@ -192,7 +192,7 @@ export function createApp() {
   });
 
   // Photo upload handler (saves base64 to uploads directory)
-  app.post('/api/guestbook/upload', (req, res) => {
+  app.post(['/api/guestbook/upload', '/guestbook/upload'], (req, res) => {
     try {
       const { imageBase64 } = req.body;
       if (!imageBase64) {
@@ -225,7 +225,7 @@ export function createApp() {
   });
 
   // CSV export
-  app.get('/api/export-csv', (req, res) => {
+  app.get(['/api/export-csv', '/export-csv'], (req, res) => {
     const db = readDb();
     let csv = 'ID,Guest Name,Attendance,Number of Guests,Contact,Notes,Submitted Date\n';
 
@@ -244,7 +244,7 @@ export function createApp() {
   });
 
   // Health check
-  app.get('/api/health', (req, res) => {
+  app.get(['/api/health', '/health'], (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 

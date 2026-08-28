@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Check, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { RSVPRecord } from '../types';
+import { dataStore } from '../services/dataStore';
 
 export const RsvpSection: React.FC = () => {
   const { t, language } = useLanguage();
@@ -47,26 +48,20 @@ export const RsvpSection: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/rsvp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          attending,
-          guestCount: attending === 'yes' ? guestCount : 0,
-          contact: contact.trim(),
-          notes: notes.trim(),
-        }),
+      const result = await dataStore.submitRsvp({
+        name: name.trim(),
+        attending,
+        guestCount: attending === 'yes' ? guestCount : 0,
+        contact: contact.trim(),
+        notes: notes.trim(),
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (result.success) {
         setIsSuccess(true);
-        setSavedRecord(data.rsvp);
-        localStorage.setItem('zh_saved_rsvp', JSON.stringify(data.rsvp));
+        setSavedRecord(result.rsvp);
+        localStorage.setItem('zh_saved_rsvp', JSON.stringify(result.rsvp));
       } else {
-        const errorData = await res.json();
-        setErrorMessage(errorData.error || 'Failed to submit RSVP.');
+        setErrorMessage('Failed to submit RSVP.');
       }
     } catch (err) {
       console.error('RSVP submission error:', err);
