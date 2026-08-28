@@ -40,30 +40,47 @@ function saveLocalGuestbook(notes: GuestbookRecord[]) {
   }
 }
 
-// Convert Supabase row to RSVPRecord
+// Convert Supabase row to RSVPRecord (handles both column conventions)
 function mapSupabaseRsvp(row: any): RSVPRecord {
+  const attendanceVal = (row.attendance || row.attending || 'yes').toString().toLowerCase();
+  const attending: 'yes' | 'no' =
+    attendanceVal.includes('no') || attendanceVal.includes('decline') ? 'no' : 'yes';
+
   return {
-    id: String(row.id || `rsvp-${Date.now()}`),
-    name: String(row.name || ''),
-    attending: (row.attending === 'no' ? 'no' : 'yes') as 'yes' | 'no',
-    guestCount: Number(row.guest_count ?? row.guestCount ?? (row.attending === 'no' ? 0 : 1)),
-    contact: String(row.contact || ''),
+    id: String(row.id ?? `rsvp-${Date.now()}`),
+    name: String(row.name || 'Guest'),
+    attending,
+    guestCount: Number(
+      row.guests_count ??
+        row.guest_count ??
+        row.guestCount ??
+        (attending === 'no' ? 0 : 1)
+    ),
+    contact: String(row.contact || row.dietary || row.email || row.phone || ''),
     notes: String(row.notes || ''),
-    createdAt: String(row.created_at || row.createdAt || new Date().toISOString()),
+    createdAt: String(
+      row.created_at ||
+        row.createdAt ||
+        (row.id && !isNaN(Number(row.id)) ? new Date(Number(row.id)).toISOString() : new Date().toISOString())
+    ),
   };
 }
 
 // Convert Supabase row to GuestbookRecord
 function mapSupabaseGuestbook(row: any): GuestbookRecord {
   return {
-    id: String(row.id || `gb-${Date.now()}`),
-    name: String(row.name || ''),
+    id: String(row.id ?? `gb-${Date.now()}`),
+    name: String(row.name || 'Guest'),
     message: String(row.message || ''),
-    photoUrl: String(row.photo_url || row.photoUrl || ''),
+    photoUrl: String(row.photo_url || row.photoUrl || row.photo || ''),
     status: (['pending', 'approved', 'hidden'].includes(row.status)
       ? row.status
       : 'pending') as 'pending' | 'approved' | 'hidden',
-    createdAt: String(row.created_at || row.createdAt || new Date().toISOString()),
+    createdAt: String(
+      row.created_at ||
+        row.createdAt ||
+        (row.id && !isNaN(Number(row.id)) ? new Date(Number(row.id)).toISOString() : new Date().toISOString())
+    ),
   };
 }
 
@@ -76,6 +93,21 @@ export const dataStore = {
 
   async loginAdmin(pin: string): Promise<boolean> {
     const cleanPin = (pin || '').trim().toUpperCase();
+
+    // Check supabase admin_config table if available
+    try {
+      const { data } = await supabase.from('admin_config').select('*').limit(5);
+      if (data && data.length > 0) {
+        const found = data.some((row: any) => {
+          const storedPin = String(row.pin || row.password || row.code || row.value || '').trim().toUpperCase();
+          return storedPin && storedPin === cleanPin;
+        });
+        if (found) return true;
+      }
+    } catch {
+      // fallback
+    }
+
     return this.verifyAdminPin(cleanPin);
   },
 
@@ -106,44 +138,30 @@ export const dataStore = {
   // --- RSVP ---
   async getRsvps(): Promise<RSVPRecord[]> {
     try {
-      const { data, error } = await supabase
-        .from('rsvps')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Fetch all from Supabase rsvps table
+      const { data, error } = await supabase.from('rsvps').select('*');
 
       if (!error && Array.isArray(data)) {
         const records = data.map(mapSupabaseRsvp);
+        // Sort newest first
+        records.sort((a, b) => {
+          const timeA = new Date(a.createdAt).getTime() || 0;
+          const timeB = new Date(b.createdAt).getTime() || 0;
+          if (timeA !== timeB) return timeB - timeA;
+          return String(b.id).localeCompare(String(a.id));
+        });
         saveLocalRsvps(records);
         return records;
       }
       if (error) {
-        console.warn('Supabase rsvps fetch note:', error.message);
+        console.warn('Supabase rsvps query note:', error.message);
       }
     } catch (err) {
-      console.warn('Supabase fetch exception, falling back:', err);
+      console.warn('Supabase fetch exception:', err);
     }
 
-    // Fallback to local / API
-    let apiRsvps: RSVPRecord[] = [];
-    try {
-      const res = await fetch('/api/rsvp');
-      if (res.ok) {
-        apiRsvps = await res.json();
-      }
-    } catch {
-      // ignore
-    }
-
-    const localRsvps = getLocalRsvps();
-    const map = new Map<string, RSVPRecord>();
-    localRsvps.forEach((r) => map.set(r.name.toLowerCase(), r));
-    apiRsvps.forEach((r) => map.set(r.name.toLowerCase(), r));
-
-    const merged = Array.from(map.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    saveLocalRsvps(merged);
-    return merged;
+    // Fallback to local
+    return getLocalRsvps();
   },
 
   async submitRsvp(record: {
@@ -153,38 +171,97 @@ export const dataStore = {
     contact?: string;
     notes?: string;
   }): Promise<{ success: boolean; rsvp: RSVPRecord }> {
-    const id = `rsvp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const cleanName = record.name.trim();
+    const guestCountNum = record.attending === 'yes' ? Math.max(1, Number(record.guestCount) || 1) : 0;
+    const cleanContact = (record.contact || '').trim();
+    const cleanNotes = (record.notes || '').trim();
+
+    let createdId = `rsvp-${Date.now()}`;
+    let writeSuccess = false;
+
+    // ATTEMPT 1: Match user's Supabase columns (attendance, guests_count, dietary, notes) without string id
+    try {
+      const { data, error } = await supabase
+        .from('rsvps')
+        .insert([
+          {
+            name: cleanName,
+            attendance: record.attending,
+            guests_count: guestCountNum,
+            dietary: cleanContact,
+            notes: cleanNotes,
+          },
+        ])
+        .select();
+
+      if (!error) {
+        writeSuccess = true;
+        if (data && data[0]?.id) {
+          createdId = String(data[0].id);
+        }
+      } else {
+        console.warn('Supabase insert Attempt 1 warning:', error.message);
+
+        // ATTEMPT 2: Standard schema with attending, guest_count, contact, created_at
+        const { data: data2, error: error2 } = await supabase
+          .from('rsvps')
+          .insert([
+            {
+              name: cleanName,
+              attending: record.attending,
+              guest_count: guestCountNum,
+              contact: cleanContact,
+              notes: cleanNotes,
+            },
+          ])
+          .select();
+
+        if (!error2) {
+          writeSuccess = true;
+          if (data2 && data2[0]?.id) {
+            createdId = String(data2[0].id);
+          }
+        } else {
+          console.warn('Supabase insert Attempt 2 warning:', error2.message);
+
+          // ATTEMPT 3: Full hybrid payload
+          const { data: data3, error: error3 } = await supabase
+            .from('rsvps')
+            .insert([
+              {
+                id: Date.now(), // Numeric id in case int8 requires an explicit value
+                name: cleanName,
+                attendance: record.attending,
+                attending: record.attending,
+                guests_count: guestCountNum,
+                guest_count: guestCountNum,
+                notes: cleanNotes,
+                dietary: cleanContact,
+              },
+            ])
+            .select();
+
+          if (!error3) {
+            writeSuccess = true;
+            if (data3 && data3[0]?.id) createdId = String(data3[0].id);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase RSVP insert exception:', err);
+    }
+
     const newRecord: RSVPRecord = {
-      id,
-      name: record.name.trim(),
+      id: createdId,
+      name: cleanName,
       attending: record.attending,
-      guestCount: record.attending === 'yes' ? Math.max(1, record.guestCount) : 0,
-      contact: record.contact ? record.contact.trim() : '',
-      notes: record.notes ? record.notes.trim() : '',
+      guestCount: guestCountNum,
+      contact: cleanContact,
+      notes: cleanNotes,
       createdAt: new Date().toISOString(),
     };
 
-    // 1. Save to Supabase Cloud Database
-    try {
-      const { error } = await supabase.from('rsvps').upsert([
-        {
-          id: newRecord.id,
-          name: newRecord.name,
-          attending: newRecord.attending,
-          guest_count: newRecord.guestCount,
-          contact: newRecord.contact,
-          notes: newRecord.notes,
-          created_at: newRecord.createdAt,
-        },
-      ]);
-      if (error) {
-        console.warn('Supabase RSVP write warning:', error.message);
-      }
-    } catch (err) {
-      console.warn('Supabase insert failed:', err);
-    }
-
-    // 2. Cache in local storage
+    // Save to local cache
     const current = getLocalRsvps();
     const existingIdx = current.findIndex(
       (r) => r.name.toLowerCase() === newRecord.name.toLowerCase()
@@ -196,58 +273,43 @@ export const dataStore = {
     }
     saveLocalRsvps(current);
 
-    // 3. Sync to API if available
-    try {
-      await fetch('/api/rsvp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record),
-      });
-    } catch {
-      // ignore
-    }
-
     return { success: true, rsvp: newRecord };
   },
 
   async deleteRsvp(id: string): Promise<boolean> {
     try {
-      await supabase.from('rsvps').delete().eq('id', id);
+      // Try deleting as numeric id if applicable, else string id
+      const numId = Number(id);
+      if (!isNaN(numId) && String(numId) === id) {
+        await supabase.from('rsvps').delete().eq('id', numId);
+      } else {
+        await supabase.from('rsvps').delete().eq('id', id);
+      }
     } catch (e) {
       console.warn('Supabase delete error:', e);
     }
 
-    const current = getLocalRsvps().filter((r) => r.id !== id);
+    const current = getLocalRsvps().filter((r) => String(r.id) !== String(id));
     saveLocalRsvps(current);
-
-    try {
-      await fetch(`/api/rsvp/${id}`, { method: 'DELETE' });
-    } catch {
-      // ignore
-    }
     return true;
   },
 
   async clearAllRsvps(): Promise<boolean> {
     try {
-      await supabase.from('rsvps').delete().neq('id', '___non_existent___');
+      await supabase.from('rsvps').delete().gte('id', 0);
+      await supabase.from('rsvps').delete().neq('name', '____no_match____');
     } catch (e) {
       console.warn('Supabase clear all error:', e);
     }
 
     saveLocalRsvps([]);
-    try {
-      await fetch('/api/rsvp/all', { method: 'DELETE' });
-    } catch {
-      // ignore
-    }
     return true;
   },
 
   // --- GUESTBOOK ---
   async getGuestbook(all: boolean = false): Promise<GuestbookRecord[]> {
     try {
-      let query = supabase.from('guestbook').select('*').order('created_at', { ascending: false });
+      let query = supabase.from('guestbook').select('*');
 
       if (!all) {
         query = query.eq('status', 'approved');
@@ -256,6 +318,12 @@ export const dataStore = {
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
         const records = data.map(mapSupabaseGuestbook);
+        records.sort((a, b) => {
+          const timeA = new Date(a.createdAt).getTime() || 0;
+          const timeB = new Date(b.createdAt).getTime() || 0;
+          if (timeA !== timeB) return timeB - timeA;
+          return String(b.id).localeCompare(String(a.id));
+        });
         if (all) {
           saveLocalGuestbook(records);
         }
@@ -268,31 +336,11 @@ export const dataStore = {
       console.warn('Supabase guestbook error:', err);
     }
 
-    // Fallback to local / API
-    let apiNotes: GuestbookRecord[] = [];
-    try {
-      const res = await fetch(`/api/guestbook${all ? '?all=true' : ''}`);
-      if (res.ok) {
-        apiNotes = await res.json();
-      }
-    } catch {
-      // ignore
-    }
-
     const localNotes = getLocalGuestbook();
-    const map = new Map<string, GuestbookRecord>();
-    localNotes.forEach((n) => map.set(n.id, n));
-    apiNotes.forEach((n) => map.set(n.id, n));
-
-    const merged = Array.from(map.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
     if (all) {
-      saveLocalGuestbook(merged);
-      return merged;
+      return localNotes;
     }
-    return merged.filter((n) => n.status === 'approved');
+    return localNotes.filter((n) => n.status === 'approved');
   },
 
   async submitGuestbook(entry: {
@@ -300,50 +348,59 @@ export const dataStore = {
     message: string;
     photoUrl?: string;
   }): Promise<{ success: boolean; entry: GuestbookRecord }> {
-    const id = `gb-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const newEntry: GuestbookRecord = {
-      id,
-      name: entry.name.trim(),
-      message: entry.message.trim(),
-      photoUrl: entry.photoUrl || '',
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
+    const cleanName = entry.name.trim();
+    const cleanMessage = entry.message.trim();
+    const photoUrl = entry.photoUrl || '';
 
-    // 1. Save to Supabase Cloud Database
+    let createdId = `gb-${Date.now()}`;
+
+    // Attempt insert into Supabase guestbook table
     try {
-      const { error } = await supabase.from('guestbook').insert([
-        {
-          id: newEntry.id,
-          name: newEntry.name,
-          message: newEntry.message,
-          photo_url: newEntry.photoUrl,
-          status: newEntry.status,
-          created_at: newEntry.createdAt,
-        },
-      ]);
-      if (error) {
-        console.warn('Supabase guestbook insert note:', error.message);
+      const { data, error } = await supabase
+        .from('guestbook')
+        .insert([
+          {
+            name: cleanName,
+            message: cleanMessage,
+            photo_url: photoUrl,
+            status: 'pending',
+          },
+        ])
+        .select();
+
+      if (!error && data && data[0]?.id) {
+        createdId = String(data[0].id);
+      } else if (error) {
+        console.warn('Supabase guestbook insert 1 warning:', error.message);
+        // Retry with numeric id or without photo_url
+        const { data: d2 } = await supabase
+          .from('guestbook')
+          .insert([
+            {
+              name: cleanName,
+              message: cleanMessage,
+              status: 'pending',
+            },
+          ])
+          .select();
+        if (d2 && d2[0]?.id) createdId = String(d2[0].id);
       }
     } catch (err) {
       console.warn('Supabase guestbook insert failed:', err);
     }
 
-    // 2. Cache locally
+    const newEntry: GuestbookRecord = {
+      id: createdId,
+      name: cleanName,
+      message: cleanMessage,
+      photoUrl,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+
     const current = getLocalGuestbook();
     current.unshift(newEntry);
     saveLocalGuestbook(current);
-
-    // 3. API sync
-    try {
-      await fetch('/api/guestbook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entry),
-      });
-    } catch {
-      // ignore
-    }
 
     return { success: true, entry: newEntry };
   },
@@ -353,61 +410,51 @@ export const dataStore = {
     status: 'pending' | 'approved' | 'hidden'
   ): Promise<boolean> {
     try {
-      await supabase.from('guestbook').update({ status }).eq('id', id);
+      const numId = Number(id);
+      if (!isNaN(numId) && String(numId) === id) {
+        await supabase.from('guestbook').update({ status }).eq('id', numId);
+      } else {
+        await supabase.from('guestbook').update({ status }).eq('id', id);
+      }
     } catch (e) {
       console.warn('Supabase status update error:', e);
     }
 
     const current = getLocalGuestbook();
-    const target = current.find((g) => g.id === id);
+    const target = current.find((g) => String(g.id) === String(id));
     if (target) {
       target.status = status;
       saveLocalGuestbook(current);
-    }
-
-    try {
-      await fetch(`/api/guestbook/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-    } catch {
-      // ignore
     }
     return true;
   },
 
   async deleteGuestbook(id: string): Promise<boolean> {
     try {
-      await supabase.from('guestbook').delete().eq('id', id);
+      const numId = Number(id);
+      if (!isNaN(numId) && String(numId) === id) {
+        await supabase.from('guestbook').delete().eq('id', numId);
+      } else {
+        await supabase.from('guestbook').delete().eq('id', id);
+      }
     } catch (e) {
       console.warn('Supabase delete error:', e);
     }
 
-    const current = getLocalGuestbook().filter((g) => g.id !== id);
+    const current = getLocalGuestbook().filter((g) => String(g.id) !== String(id));
     saveLocalGuestbook(current);
-
-    try {
-      await fetch(`/api/guestbook/${id}`, { method: 'DELETE' });
-    } catch {
-      // ignore
-    }
     return true;
   },
 
   async clearAllGuestbook(): Promise<boolean> {
     try {
-      await supabase.from('guestbook').delete().neq('id', '___non_existent___');
+      await supabase.from('guestbook').delete().gte('id', 0);
+      await supabase.from('guestbook').delete().neq('name', '____no_match____');
     } catch (e) {
       console.warn('Supabase clear error:', e);
     }
 
     saveLocalGuestbook([]);
-    try {
-      await fetch('/api/guestbook/all', { method: 'DELETE' });
-    } catch {
-      // ignore
-    }
     return true;
   },
 };
