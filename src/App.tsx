@@ -13,7 +13,7 @@ import { GuestbookSection } from './sections/GuestbookSection';
 import { RsvpSection } from './sections/RsvpSection';
 import { FinalSection } from './sections/FinalSection';
 import { AdminPortal } from './pages/AdminPortal';
-import { Lock, Heart, Instagram, Facebook } from 'lucide-react';
+import { Lock, Instagram, Facebook, Music2, Mail } from 'lucide-react';
 
 const MainWeddingApp: React.FC = () => {
   const [isEntered, setIsEntered] = useState<boolean>(false);
@@ -72,21 +72,27 @@ const MainWeddingApp: React.FC = () => {
       {/* Small Elegant Footer */}
       <footer className="w-full bg-[#050505] border-t border-white/10 py-10 px-6 text-center">
         <div className="max-w-3xl mx-auto flex flex-col items-center gap-4">
-          {/* Made with love notice */}
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-serif-luxury tracking-[0.2em] text-white/70">
+          {/* Made with love notice (No heart icon) */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-serif-luxury tracking-[0.2em] text-white/70">
             <span>Made with love by</span>
-            <span className="font-semibold text-white tracking-[0.22em] uppercase">Everafterinvites</span>
-            <Heart size={12} className="text-red-400 fill-red-400 inline-block ml-0.5" />
+            <a
+              href="https://www.instagram.com/_everafterinvites_/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-white tracking-[0.22em] uppercase hover:text-white/80 transition-colors underline-offset-4 hover:underline"
+            >
+              Everafterinvites
+            </a>
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center justify-center gap-6 pt-1">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-1">
             {/* Instagram */}
             <a
               href="https://www.instagram.com/_everafterinvites_/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
               aria-label="Instagram"
             >
               <Instagram size={14} className="group-hover:scale-110 transition-transform" />
@@ -100,10 +106,10 @@ const MainWeddingApp: React.FC = () => {
               href="https://www.tiktok.com/@_everafterinvites_"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
               aria-label="TikTok"
             >
-              <span className="font-bold text-[11px] leading-none px-1 py-0.5 rounded border border-white/30 group-hover:border-white transition-colors">TT</span>
+              <Music2 size={14} className="group-hover:scale-110 transition-transform text-white/80" />
               <span className="font-sans-luxury text-[11px] tracking-wider uppercase">TikTok</span>
             </a>
 
@@ -114,11 +120,23 @@ const MainWeddingApp: React.FC = () => {
               href="https://www.facebook.com/profile.php?id=61591562833010"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors group"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
               aria-label="Facebook"
             >
               <Facebook size={14} className="group-hover:scale-110 transition-transform" />
               <span className="font-sans-luxury text-[11px] tracking-wider uppercase">Facebook</span>
+            </a>
+
+            <span className="text-white/20">·</span>
+
+            {/* Email Contact */}
+            <a
+              href="mailto:contact.everafterinvites@gmail.com"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors group"
+              aria-label="Email Everafterinvites"
+            >
+              <Mail size={14} className="group-hover:scale-110 transition-transform" />
+              <span className="font-sans-luxury text-[11px] tracking-wider uppercase">Contact</span>
             </a>
           </div>
 

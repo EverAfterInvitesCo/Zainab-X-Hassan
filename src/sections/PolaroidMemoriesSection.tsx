@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Maximize2, Pause, Play } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { PolaroidPhoto } from '../types';
 
@@ -98,21 +98,83 @@ const galleryPhotos: PolaroidPhoto[] = [
   },
 ];
 
+// Duplicated list for seamless infinite loop
+const infiniteGallery = [...galleryPhotos, ...galleryPhotos];
+
 export const PolaroidMemoriesSection: React.FC = () => {
   const { t, language, isRtl } = useLanguage();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activePhoto, setActivePhoto] = useState<PolaroidPhoto | null>(null);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const isInteractingRef = useRef<boolean>(false);
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Smooth continuous automatic horizontal scroll loop
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+    const scrollSpeed = 0.55; // Pixels per frame at 60fps (~33px/sec)
+
+    const step = (currentTime: number) => {
+      const delta = Math.min(currentTime - lastTime, 50);
+      lastTime = currentTime;
+
+      if (!isPaused && !isInteractingRef.current && container) {
+        const halfWidth = container.scrollWidth / 2;
+
+        if (isRtl) {
+          container.scrollLeft -= (scrollSpeed * delta) / 16.67;
+          if (Math.abs(container.scrollLeft) >= halfWidth) {
+            container.scrollLeft = 0;
+          }
+        } else {
+          container.scrollLeft += (scrollSpeed * delta) / 16.67;
+          if (container.scrollLeft >= halfWidth) {
+            container.scrollLeft -= halfWidth;
+          }
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, [isPaused, isRtl]);
+
+  const handleUserInteractionStart = () => {
+    isInteractingRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+  };
+
+  const handleUserInteractionEnd = () => {
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => {
+      isInteractingRef.current = false;
+    }, 2000);
+  };
 
   const scrollLeft = () => {
+    handleUserInteractionStart();
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: isRtl ? 380 : -380, behavior: 'smooth' });
     }
+    handleUserInteractionEnd();
   };
 
   const scrollRight = () => {
+    handleUserInteractionStart();
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: isRtl ? -380 : 380, behavior: 'smooth' });
     }
+    handleUserInteractionEnd();
   };
 
   return (
@@ -131,8 +193,17 @@ export const PolaroidMemoriesSection: React.FC = () => {
             </h2>
           </div>
 
-          {/* Desktop scroll navigation controls */}
+          {/* Desktop scroll navigation controls & Auto-play toggle */}
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 hover:border-white/40 text-[11px] font-sans-luxury tracking-[0.2em] uppercase text-white/60 hover:text-white transition-colors"
+              title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
+            >
+              {isPaused ? <Play size={12} className="text-emerald-400" /> : <Pause size={12} />}
+              <span>{isPaused ? (language === 'ar' ? 'تشغيل' : 'AUTO-SCROLL') : (language === 'ar' ? 'إيقاف' : 'AUTO-SCROLLING')}</span>
+            </button>
+
             <span className="text-xs font-sans-luxury tracking-[0.2em] text-white/40 uppercase hidden sm:inline">
               {t.memories.scrollInstruction}
             </span>
@@ -140,7 +211,7 @@ export const PolaroidMemoriesSection: React.FC = () => {
               <button
                 id="zh-polaroid-scroll-left"
                 onClick={scrollLeft}
-                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 aria-label="Scroll gallery left"
               >
                 <ChevronLeft size={18} />
@@ -148,7 +219,7 @@ export const PolaroidMemoriesSection: React.FC = () => {
               <button
                 id="zh-polaroid-scroll-right"
                 onClick={scrollRight}
-                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+                className="w-10 h-10 rounded-full border border-white/20 hover:border-white text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 aria-label="Scroll gallery right"
               >
                 <ChevronRight size={18} />
@@ -158,20 +229,24 @@ export const PolaroidMemoriesSection: React.FC = () => {
         </div>
       </div>
 
-      {/* HORIZONTAL SCROLL RUNWAY - MANDATORY HORIZONTAL ON ALL DEVICES */}
+      {/* HORIZONTAL SCROLL RUNWAY - CONTINUOUS AUTO-SCROLL */}
       <div
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto no-scrollbar py-8 px-6 md:px-12 cursor-grab active:cursor-grabbing scroll-smooth"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={handleUserInteractionStart}
+        onTouchEnd={handleUserInteractionEnd}
+        className="w-full overflow-x-auto no-scrollbar py-8 px-6 md:px-12 cursor-grab active:cursor-grabbing"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <div className="flex items-center gap-8 md:gap-12 min-w-max pb-6">
-          {galleryPhotos.map((photo, index) => (
+          {infiniteGallery.map((photo, index) => (
             <motion.div
-              key={photo.id}
+              key={`${photo.id}-${index}`}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: index * 0.08 }}
+              transition={{ duration: 0.8 }}
               whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.3 } }}
               onClick={() => setActivePhoto(photo)}
               style={{
@@ -179,7 +254,7 @@ export const PolaroidMemoriesSection: React.FC = () => {
               }}
               className="group relative bg-[#F6F5F2] text-[#111111] p-3.5 pb-6 sm:p-4 sm:pb-8 rounded-[3px] shadow-[0_20px_40px_rgba(0,0,0,0.85)] hover:shadow-[0_25px_50px_rgba(255,255,255,0.08)] cursor-pointer transition-shadow duration-300 w-[260px] sm:w-[300px] md:w-[330px] shrink-0 select-none"
             >
-              {/* Photo Area without text */}
+              {/* Photo Area */}
               <div className="relative aspect-[4/5] bg-[#141414] overflow-hidden rounded-[2px]">
                 <img
                   src={photo.src}
