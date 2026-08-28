@@ -258,11 +258,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
 
             <div className="relative">
               <input
-                type="text"
+                type="password"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="Enter Password (e.g. ZH2027)"
-                className="w-full bg-white/[0.05] border border-white/20 focus:border-white text-white px-4 py-3.5 text-sm font-sans-luxury text-center tracking-[0.2em] focus:outline-none transition-colors"
+                placeholder="Enter Password"
+                className="w-full bg-white/[0.05] border border-white/20 focus:border-white text-white px-4 py-3.5 text-sm font-sans-luxury text-center tracking-[0.3em] focus:outline-none transition-colors"
                 required
                 autoFocus
               />
@@ -275,10 +275,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
             >
               {loading ? 'AUTHENTICATING...' : 'ACCESS PORTAL'}
             </button>
-
-            <p className="text-[11px] text-white/40 font-sans-luxury tracking-wider mt-2">
-              Default Organizer PIN: <code className="text-white/80 font-mono font-bold">ZH2027</code> or <code className="text-white/80 font-mono font-bold">2027</code>
-            </p>
           </form>
         </motion.div>
       </div>
