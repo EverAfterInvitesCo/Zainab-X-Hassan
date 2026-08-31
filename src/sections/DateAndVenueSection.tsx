@@ -1,39 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Clock, Navigation as NavIcon, ExternalLink } from 'lucide-react';
-
-interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+import { Clock, MapPin } from 'lucide-react';
 
 export const DateAndVenueSection: React.FC = () => {
-  const weddingDate = new Date('2027-01-08T18:00:00+04:00');
-
-  const calculateTimeLeft = (): TimeLeft => {
-    const difference = weddingDate.getTime() - new Date().getTime();
-    if (difference <= 0) {
-      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
-    return {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
-    };
-  };
-
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const openGoogleMaps = () => {
     window.open('https://maps.google.com/?q=Movenpick+Hotel+Apartments+Bur+Dubai', '_blank');
   };
@@ -41,107 +10,77 @@ export const DateAndVenueSection: React.FC = () => {
   return (
     <section
       id="details"
-      className="relative w-full py-24 md:py-32 bg-[#F5EFE6] text-[#2B2421] overflow-hidden"
+      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-[#2B2421] text-white"
     >
-      {/* Decorative luxury gradient background */}
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#C5A059_0.75px,transparent_0.75px)] [background-size:24px_24px] pointer-events-none" />
+      {/* Background Image: 3.jpg with romantic cinematic backdrop */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <img
+          src="/media/3.jpg"
+          alt="Hasan and Zainab Wedding Venue & Time"
+          className="w-full h-full object-cover object-center contrast-[1.05] brightness-[0.75] saturate-[0.95]"
+          loading="eager"
+        />
+        {/* Soft vignette and smooth blend gradients top & bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2]/20 via-transparent to-[#FAF7F2]/10" />
+        <div className="absolute inset-0 film-grain pointer-events-none opacity-40" />
+      </div>
 
-      <div className="max-w-3xl mx-auto px-6 relative z-10">
-        {/* Section Title in English and Arabic ABOVE the card */}
-        <div className="text-center mb-10">
-          <h2 className="font-display-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#2B2421] uppercase tracking-[0.18em]">
-            DATE &amp; VENUE
-          </h2>
-          <h3 className="font-arabic-calligraphy text-3xl sm:text-4xl text-[#A67C2E] mt-1">
-            التاريخ وموقع الحفل
-          </h3>
-        </div>
+      {/* Floating subtle dandelion particles/seeds aesthetic matching reference */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[5]">
+        <div className="absolute top-[22%] right-[16%] w-2.5 h-2.5 rounded-full bg-white/30 blur-[1px] animate-pulse" />
+        <div className="absolute top-[40%] left-[15%] w-2 h-2 rounded-full bg-white/25 blur-[1px]" />
+        <div className="absolute bottom-[35%] right-[20%] w-3 h-3 rounded-full bg-white/20 blur-[1px]" />
+        <div className="absolute bottom-[20%] left-[22%] w-2.5 h-2.5 rounded-full bg-white/25 blur-[1px]" />
+      </div>
 
-        {/* Single Unified Box */}
+      {/* Content directly overlaying 3.jpg without any enclosing box */}
+      <div className="relative z-10 max-w-xl mx-auto px-6 py-24 sm:py-32 text-center flex flex-col items-center justify-center" dir="rtl">
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="bg-[#FFFFFF] border border-[#EADBCE] rounded-3xl p-8 sm:p-12 md:p-14 shadow-[0_20px_50px_rgba(180,140,110,0.1)] text-center relative"
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full flex flex-col items-center text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
         >
-          {/* Date & Time Header */}
-          <div className="mb-8">
-            <h3 className="font-serif-luxury text-2xl sm:text-3xl md:text-4xl text-[#2B2421] font-medium tracking-wide">
-              Friday, 8 January 2027
-            </h3>
-            <p className="font-arabic-calligraphy text-2xl sm:text-3xl text-[#A67C2E] mt-1.5">
-              الجمعة، ٨ يناير ٢٠٢٧
+          {/* Header Calligraphy: الحفل */}
+          <h2 className="font-arabic-calligraphy text-5xl sm:text-6xl md:text-7xl text-white font-normal mb-8 sm:mb-10 tracking-wide">
+            الحفل
+          </h2>
+
+          {/* Time Section with Clock Icon */}
+          <div className="flex flex-col items-center mb-10 sm:mb-12">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white text-[#2B2421] flex items-center justify-center mb-3 shadow-md">
+              <Clock size={22} className="stroke-[2.2]" />
+            </div>
+            <p className="font-arabic text-2xl sm:text-3xl text-white font-medium tracking-wide">
+              6:00 مساءً
             </p>
-
-            <div className="mt-4 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#FAF7F2] border border-[#EADBCE] text-xs sm:text-sm font-sans-luxury text-[#6B5E55]">
-              <Clock size={14} className="text-[#A67C2E]" />
-              <span>6:00 PM GST · ٦:٠٠ مساءً</span>
-            </div>
           </div>
 
-          {/* Real-time Countdown Timer Units */}
-          <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-lg mx-auto mb-10">
-            {[
-              { value: timeLeft.days, labelEn: 'DAYS', labelAr: 'أيام' },
-              { value: timeLeft.hours, labelEn: 'HOURS', labelAr: 'ساعات' },
-              { value: timeLeft.minutes, labelEn: 'MINS', labelAr: 'دقائق' },
-              { value: timeLeft.seconds, labelEn: 'SECS', labelAr: 'ثواني' },
-            ].map((unit, index) => (
-              <div
-                key={index}
-                className="bg-[#FAF7F2] border border-[#EADBCE] rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center justify-center shadow-sm"
-              >
-                <span className="font-display-luxury text-2xl sm:text-3xl font-light text-[#2B2421]">
-                  {String(unit.value).padStart(2, '0')}
-                </span>
-                <span className="text-[9px] font-sans-luxury tracking-[0.2em] uppercase text-[#A67C2E] font-semibold mt-1">
-                  {unit.labelEn}
-                </span>
-                <span className="text-[9px] font-arabic text-[#8C7D70]">
-                  {unit.labelAr}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Golden Divider */}
-          <div className="flex items-center justify-center gap-3 w-32 mx-auto mb-10 opacity-70">
-            <div className="h-[1px] flex-1 bg-[#C5A059]" />
-            <div className="w-1.5 h-1.5 rotate-45 bg-[#C5A059]" />
-            <div className="h-[1px] flex-1 bg-[#C5A059]" />
-          </div>
-
-          {/* Venue Location & Name */}
-          <div className="space-y-3 mb-8">
-            <div className="flex items-center justify-center gap-2 text-[#A67C2E]">
-              <MapPin size={22} className="stroke-[1.5]" />
+          {/* Location Section with Map Pin Icon */}
+          <div className="flex flex-col items-center mb-10 sm:mb-12" dir="ltr">
+            <div className="text-white mb-3 drop-shadow-md">
+              <MapPin size={38} className="fill-white stroke-none text-white" />
             </div>
 
-            <h4 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#2B2421] tracking-wide">
+            <h3 className="font-serif-luxury text-2xl sm:text-3xl md:text-4xl text-white font-normal tracking-wide text-center leading-snug">
               Mövenpick Hotel &amp; Apartments Bur Dubai
-            </h4>
-            <p className="font-sans-luxury text-xs sm:text-sm tracking-[0.15em] text-[#6B5E55] uppercase font-medium">
+            </h3>
+
+            <p className="font-serif-luxury text-lg sm:text-xl text-white/90 font-light mt-1.5 text-center">
               19th Street, Oud Metha, Dubai
             </p>
-            <p className="font-arabic text-lg sm:text-xl text-[#A67C2E] pt-1 font-medium" dir="rtl">
-              فندق موڤنمبيك، شارع ١٩، عود ميثاء، دبي
-            </p>
           </div>
 
-          {/* Bespoke Luxury Google Maps Button */}
-          <div className="pt-6 border-t border-[#EADBCE]">
-            <button
-              onClick={openGoogleMaps}
-              className="group w-full sm:w-auto px-10 py-4 bg-[#2B2421] hover:bg-[#3D332F] border border-[#C5A059] text-[#FAF7F2] rounded-full text-xs font-sans-luxury tracking-[0.22em] uppercase font-semibold transition-all duration-300 inline-flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(43,36,33,0.12)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.2)] hover:scale-[1.01] cursor-pointer"
-            >
-              <NavIcon size={14} className="text-[#C5A059] group-hover:rotate-45 transition-transform duration-300" />
-              <span>OPEN IN GOOGLE MAPS</span>
-              <span className="w-1 h-1 rounded-full bg-[#C5A059]" />
-              <span className="font-arabic font-normal text-sm text-[#EADBCE]">خرائط جوجل</span>
-              <ExternalLink size={12} className="opacity-60 group-hover:opacity-100 transition-opacity" />
-            </button>
-          </div>
+          {/* Location Button: خريطة الموقع in clean framed outline button */}
+          <button
+            onClick={openGoogleMaps}
+            className="w-56 sm:w-64 py-3 sm:py-3.5 border-2 border-white/90 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-[2px] text-white text-lg sm:text-xl font-arabic rounded-none transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:scale-[1.02] cursor-pointer"
+            dir="rtl"
+          >
+            خريطة الموقع
+          </button>
         </motion.div>
       </div>
     </section>

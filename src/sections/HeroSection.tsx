@@ -11,8 +11,8 @@ export const HeroSection: React.FC = () => {
       {/* Background Image with warm champagne & rose-tinted cinematic grading */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
-          src="/media/3.jpg"
-          alt="Zainab and Hasan"
+          src="/media/1.jpg"
+          alt="Hasan and Zainab"
           className="w-full h-full object-cover object-center contrast-[1.03] brightness-[0.9] saturate-[0.9] animate-cinematic-zoom"
           loading="eager"
         />
@@ -30,14 +30,14 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col items-center"
         >
-          {/* Bride & Groom Name - ENGLISH */}
+          {/* Groom & Bride Name - ENGLISH */}
           <h1 className="font-display-luxury text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-[#2B2421] uppercase tracking-[0.2em] leading-none mb-3 drop-shadow-sm">
-            ZAINAB &amp; HASAN
+            HASAN &amp; ZAINAB
           </h1>
 
-          {/* Bride & Groom Name - ARABIC */}
+          {/* Groom & Bride Name - ARABIC */}
           <h2 className="font-arabic-calligraphy text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-[#A67C2E] leading-tight drop-shadow-sm">
-            زينب و حسن
+            حسن و زينب
           </h2>
         </motion.div>
       </div>

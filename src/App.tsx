@@ -7,8 +7,8 @@ import { EntryScreen } from './sections/EntryScreen';
 import { HeroSection } from './sections/HeroSection';
 import { InvitationSection } from './sections/InvitationSection';
 import { DateAndVenueSection } from './sections/DateAndVenueSection';
-import { PolaroidMemoriesSection } from './sections/PolaroidMemoriesSection';
 import { RsvpSection } from './sections/RsvpSection';
+import { EtiquetteSection } from './sections/EtiquetteSection';
 import { FinalSection } from './sections/FinalSection';
 import { AdminPortal } from './pages/AdminPortal';
 import { Lock, Instagram, Facebook, Music2, Mail } from 'lucide-react';
@@ -60,7 +60,7 @@ const MainWeddingApp: React.FC = () => {
         <InvitationSection />
         <DateAndVenueSection />
         <RsvpSection />
-        <PolaroidMemoriesSection />
+        <EtiquetteSection />
         <FinalSection />
       </main>
 
@@ -137,7 +137,7 @@ const MainWeddingApp: React.FC = () => {
 
           {/* Hashtag & Organizer Portal */}
           <div className="flex items-center gap-4 pt-2 text-[10px] font-sans-luxury tracking-[0.25em] text-[#8C7D70] uppercase">
-            <span>#ZAINABANDHASAN</span>
+            <span>#HASANANDZAINAB</span>
             <span>·</span>
             <button
               onClick={handleAdminToggle}

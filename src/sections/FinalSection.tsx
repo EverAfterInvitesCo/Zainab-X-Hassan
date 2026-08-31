@@ -7,11 +7,11 @@ export const FinalSection: React.FC = () => {
       id="final"
       className="relative w-full min-h-[80vh] flex items-center justify-center overflow-hidden bg-[#FAF7F2]"
     >
-      {/* Background: 9.jpg with warm champagne grading */}
+      {/* Background: 5.jpg with warm champagne grading */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
-          src="/media/9.jpg"
-          alt="Zainab and Hasan Grand Finale"
+          src="/media/5.jpg"
+          alt="Hasan and Zainab Grand Finale"
           className="w-full h-full object-cover object-center contrast-[1.05] brightness-[0.88] saturate-[0.9] animate-cinematic-zoom"
           loading="lazy"
         />

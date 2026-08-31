@@ -26,7 +26,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onAdminClick }) => {
     { href: '#invitation', labelEn: 'INVITATION', labelAr: 'الدعوة' },
     { href: '#details', labelEn: 'DATE & VENUE', labelAr: 'الحفل والموقع' },
     { href: '#rsvp', labelEn: 'RSVP', labelAr: 'تأكيد الحضور' },
-    { href: '#memories', labelEn: 'MEMORIES', labelAr: 'ذكرياتنا' },
+    { href: '#etiquette', labelEn: 'NOTICE', labelAr: 'منعاً للإحراج' },
   ];
 
   const handleLinkClick = (href: string) => {
@@ -58,10 +58,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onAdminClick }) => {
           className="group flex items-center gap-2.5 cursor-pointer focus:outline-none"
         >
           <span className="font-display-luxury text-base sm:text-lg tracking-[0.22em] text-[#2B2421] uppercase font-medium">
-            ZAINAB &amp; HASAN
+            HASAN &amp; ZAINAB
           </span>
           <span className="text-[#C5A059] font-arabic-calligraphy text-lg">
-            زينب و حسن
+            حسن و زينب
           </span>
         </a>
 
@@ -145,7 +145,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onAdminClick }) => {
           <div className="pt-6 border-t border-[#EADBCE] flex flex-col gap-4">
             <div className="flex items-center justify-between text-xs text-[#8C7D70] font-sans-luxury tracking-widest">
               <span>DUBAI, UAE</span>
-              <span>08 · 01 · 2027</span>
+              <span>09 · 01 · 2027</span>
             </div>
 
             {onAdminClick && (
