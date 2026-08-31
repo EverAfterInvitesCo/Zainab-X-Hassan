@@ -65,7 +65,7 @@ export const DateAndVenueSection: React.FC = () => {
             </div>
 
             <h3 className="font-serif-luxury text-2xl sm:text-3xl md:text-4xl text-white font-normal tracking-wide text-center leading-snug">
-              Mövenpick Hotel &amp; Apartments Bur Dubai
+              Mövenpick Hotel, Bur Dubai
             </h3>
 
             <p className="font-serif-luxury text-lg sm:text-xl text-white/90 font-light mt-1.5 text-center">
