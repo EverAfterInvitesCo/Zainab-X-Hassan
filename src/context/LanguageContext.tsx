@@ -398,8 +398,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   useEffect(() => {
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = language;
+    // Keep document direction stable as LTR so the bilingual layout, typography, and English titles never get inverted
+    document.documentElement.dir = 'ltr';
+    document.documentElement.lang = 'en';
   }, [language]);
 
   const isRtl = language === 'ar';

@@ -44,7 +44,7 @@ const MainWeddingApp: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#FAF7F2] text-[#2B2421] selection:bg-[#E8C5C8] selection:text-[#2B2421]">
+    <div className="relative min-h-screen bg-[#FAF7F2] text-[#2B2421] selection:bg-[#E8C5C8] selection:text-[#2B2421] notranslate" translate="no">
       {/* Entry Screen Curtain */}
       <EntryScreen onEnter={() => setIsEntered(true)} isEntered={isEntered} />
 
