@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import etiquetteBg from '../assets/images/wedding_etiquette_mobile_bg_1788183532159.jpg';
+import etiquetteBg from '../assets/images/wedding_etiquette_bg_1788182872002.jpg';
 
 export const EtiquetteSection: React.FC = () => {
   return (
@@ -8,23 +8,23 @@ export const EtiquetteSection: React.FC = () => {
       id="etiquette"
       className="relative w-full min-h-screen flex flex-col items-center justify-start overflow-hidden bg-[#FAF7F2] text-[#6A1B29]"
     >
-      {/* Illustrated wedding etiquette background with 9:16 mobile-optimized vertical framing */}
+      {/* Original illustrated wedding etiquette background */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src={etiquetteBg}
           alt="Wedding Etiquette Notice"
-          className="w-full h-full object-cover object-bottom brightness-[1.0] contrast-[1.02]"
+          className="w-full h-full object-cover object-bottom sm:object-center brightness-[1.0] contrast-[1.02]"
           referrerPolicy="no-referrer"
           loading="lazy"
         />
-        {/* Soft luminous gradient to ensure crisp contrast for text on all mobile screens */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2]/60 via-[#FAF7F2]/20 to-transparent" />
+        {/* Soft luminous gradient to ensure crisp contrast for burgundy text on mobile screens */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2]/70 via-[#FAF7F2]/30 to-transparent" />
         <div className="absolute inset-0 film-grain pointer-events-none opacity-20" />
       </div>
 
-      {/* Content positioned securely in the upper cream/floral headroom */}
+      {/* Content positioned in the upper open space in rich burgundy */}
       <div
-        className="relative z-10 w-full max-w-lg mx-auto px-6 pt-28 sm:pt-36 pb-64 sm:pb-56 text-center flex flex-col items-center justify-start"
+        className="relative z-10 w-full max-w-lg mx-auto px-6 pt-24 sm:pt-32 pb-72 sm:pb-60 text-center flex flex-col items-center justify-start"
         dir="rtl"
       >
         <motion.div
